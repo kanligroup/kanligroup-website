@@ -1,12 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
 import DirectionTree from '../components/DirectionTree.astro';
-
-const directions = (await getCollection('directions')).sort((a, b) => a.data.order - b.data.order);
-const members = await getCollection('members');
-const membersByDir = (title: string) =>
-  members.filter((m) => m.data.direction === title && !m.data.is_pi);
 ---
 
 <BaseLayout title="研究方向 · Kan Li Group">
@@ -26,26 +20,6 @@ const membersByDir = (title: string) =>
     <h2 class="section">研究方向架构</h2>
     <div class="tree-figure">
       <DirectionTree />
-    </div>
-  </section>
-
-  <section class="block container">
-    <h2 class="section">研究方向</h2>
-    <div class="cards">
-      {directions.map((d) => (
-        <div class="card card--direction">
-          <h3>{d.data.title}</h3>
-          <p class="dir-summary">{d.data.lead}</p>
-          {membersByDir(d.data.title).length > 0 && (
-            <p class="members">
-              <span class="muted">成员（{membersByDir(d.data.title).length}）：</span>
-              {membersByDir(d.data.title).map((m, i) => (
-                <span>{m.data.name}{i < membersByDir(d.data.title).length - 1 ? '、' : ''}</span>
-              ))}
-            </p>
-          )}
-        </div>
-      ))}
     </div>
   </section>
 </BaseLayout>

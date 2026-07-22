@@ -1,24 +1,61 @@
 ---
-// 研究方向树状图：核心科学问题为根，分三个方向，每方向下列出子方向
-// 成员人数从 members collection 动态计算，避免与卡片不一致
+// 研究方向架构图：核心科学问题为根，分三个方向；
+// 每个方向框内列出子方向与团队成员；底部新增「应用场景」一行，分别对应三个方向。
+// 成员与人数均从 members collection 动态计算，避免与页面其它处不一致。
 import { getCollection } from 'astro:content';
 
 const PRIMARY = "#1a4d8f";
 const SOFT = "#eef3f9";
+const ACCENT = "#0f6e58";      // 应用场景行配色
+const ACCENT_SOFT = "#e6f2ef";
 const LINE = "#b9c7da";
 const DARK = "#1f2d3d";
 const MUTED = "#5b6b7b";
 
 const members = await getCollection('members');
-const countFor = (title: string) =>
-  members.filter((m) => m.data.direction === title && !m.data.is_pi).length;
+
+// 按方向取在读学生姓名（不含 PI）
+const namesFor = (title: string) =>
+  members
+    .filter((m) => m.data.direction === title && !m.data.is_pi)
+    .map((m) => m.data.name);
+
+// 保持词完整的换行（中文按字符等宽，按 token 包裹避免切坏人名）
+function wrapTokens(tokens: string[], max: number): string[] {
+  const lines: string[] = [];
+  let cur = '';
+  for (const t of tokens) {
+    if (cur.length + t.length > max && cur.length > 0) {
+      lines.push(cur);
+      cur = t;
+    } else {
+      cur += t;
+    }
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+// 长句按字符换行
+function wrapChars(str: string, max: number): string[] {
+  const lines: string[] = [];
+  let cur = '';
+  for (const ch of str) {
+    cur += ch;
+    if (cur.length >= max) {
+      lines.push(cur);
+      cur = '';
+    }
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
 
 const tree = {
   root: { title: "核心科学问题", sub: "以理论与应用力学为统摄 · 柔性载体上的分布式感知" },
   branches: [
     {
       title: "柔性电子微飞行器",
-      count: countFor("柔性电子微飞行器"),
       sub: [
         "仿生三维微飞行器结构设计",
         "飞行力学与主动调控",
@@ -26,10 +63,11 @@ const tree = {
         "无线组网与低功耗图传",
         "旋翼健康监测",
       ],
+      scenario:
+        "空地协同的分布式感知节点：面向灾害救援、精准农业与狭窄空间的群体监测，构成 Physical AI 的空间感知前端。",
     },
     {
       title: "耐高温柔性多模态传感器",
-      count: countFor("耐高温柔性多模态传感器"),
       sub: [
         "多参量分布式感知",
         "压力阵列化感知",
@@ -38,20 +76,35 @@ const tree = {
         "柔性多模态传感",
         "柔性蒙皮",
       ],
+      scenario:
+        "极端环境下的结构健康监测：航空发动机与燃机热端部件、复杂曲面蒙皮的共形多参量感知与装备预测性维护。",
     },
     {
       title: "柔性智能微系统",
-      count: countFor("柔性智能微系统"),
       sub: [
         "摩擦纳米发电机纤维",
         "柔性混合传感与无线定位",
         "模块化柔性机器人与软体驱动",
         "侵入式脑机接口",
       ],
+      scenario:
+        "人–机–环融合的智能终端：可穿戴/植入式健康监测、软体机器人感知–驱动一体与神经接口康复。",
     },
   ],
 };
 
+// 为每个分支补全成员与换行后的文本行
+const STUDENT_MAX = 20;
+const SCEN_MAX = 17;
+tree.branches.forEach((b) => {
+  const names = namesFor(b.title);
+  b.count = names.length;
+  const tokens = names.map((n, i) => (i < names.length - 1 ? n + "、" : n));
+  b.studentLines = wrapTokens(tokens, STUDENT_MAX);
+  b.scenarioLines = wrapChars(b.scenario, SCEN_MAX);
+});
+
+// 布局常量
 const W = 1120;
 const BW = 344;
 const GAP = (W - BW * 3) / 4;
@@ -61,32 +114,50 @@ const ROOT_Y = 26;
 const ROOT_H = 88;
 const BUS_Y = 162;
 const BRANCH_Y = 228;
-const HEADER_H = 76;
-const ITEM_H = 30;
-const PAD = 18;
+const HEADER_H = 56;
+const SUB_ITEM_H = 28;
+const SUB_TOP = HEADER_H + 16;       // 第一个子方向文字基线
+const DIVIDER_Y_OFF = 6;
+const STUDENT_LABEL_OFF = 20;
+const STUDENT_LINE_H = 21;
+const BOTTOM_PAD = 16;
 
-const centers = tree.branches.map((_, i) => GAP + i * (BW + GAP) + BW / 2);
 const xs = tree.branches.map((_, i) => GAP + i * (BW + GAP));
-const heights = tree.branches.map((b) => HEADER_H + b.sub.length * ITEM_H + PAD);
-const maxH = Math.max(...heights);
-const H = BRANCH_Y + maxH + 26;
+const centers = tree.branches.map((_, i) => xs[i] + BW / 2);
+
+const heights = tree.branches.map((b) => {
+  const dividerY = HEADER_H + b.sub.length * SUB_ITEM_H + DIVIDER_Y_OFF;
+  const labelY = dividerY + STUDENT_LABEL_OFF;
+  const firstLineY = labelY + STUDENT_LINE_H;
+  return firstLineY + (b.studentLines.length - 1) * STUDENT_LINE_H + BOTTOM_PAD;
+});
+const maxBranchH = Math.max(...heights);
+
+// 应用场景行
+const SCEN_LABEL_Y = BRANCH_Y + maxBranchH + 40;
+const SCEN_BOX_Y = SCEN_LABEL_Y + 28;
+const maxScenLines = Math.max(...tree.branches.map((b) => b.scenarioLines.length));
+const SCEN_BOX_H = 16 + maxScenLines * 22 + 16;
+
+const H = SCEN_BOX_Y + SCEN_BOX_H + 26;
 ---
 
 <svg
   class="dir-tree"
   viewBox={`0 0 ${W} ${H}`}
   role="img"
-  aria-label="研究方向树状图"
+  aria-label="研究方向架构图"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <!-- connectors -->
+  <!-- 连接线 -->
   <g stroke={LINE} stroke-width="2.5" fill="none">
     <line x1={W / 2} y1={ROOT_Y + ROOT_H} x2={W / 2} y2={BUS_Y} />
     <line x1={centers[0]} y1={BUS_Y} x2={centers[centers.length - 1]} y2={BUS_Y} />
     {centers.map((cx) => <line x1={cx} y1={BUS_Y} x2={cx} y2={BRANCH_Y} />)}
+    {centers.map((cx) => <line x1={cx} y1={BRANCH_Y + maxBranchH} x2={cx} y2={SCEN_BOX_Y} />)}
   </g>
 
-  <!-- root -->
+  <!-- 根节点 -->
   <g>
     <rect x={ROOT_X} y={ROOT_Y} width={ROOT_W} height={ROOT_H} rx="12" fill={PRIMARY} />
     <text x={W / 2} y={ROOT_Y + 36} text-anchor="middle" fill="#fff" font-size="25" font-weight="700">
@@ -97,21 +168,48 @@ const H = BRANCH_Y + maxH + 26;
     </text>
   </g>
 
-  <!-- branches -->
-  {tree.branches.map((b, i) => (
-    <g transform={`translate(${xs[i]}, ${BRANCH_Y})`}>
-      <rect x="0" y="0" width={BW} height={heights[i]} rx="12" fill="#fff" stroke={PRIMARY} stroke-width="1.5" />
-      <rect x="0" y="0" width={BW} height="54" rx="12" fill={SOFT} />
-      <text x="18" y="26" fill={PRIMARY} font-size="19" font-weight="700">{b.title}</text>
-      <text x="18" y="47" fill={MUTED} font-size="14">{b.count} 名成员</text>
-      {b.sub.map((s, j) => (
-        <g transform={`translate(0, ${HEADER_H + j * ITEM_H})`}>
-          <circle cx="22" cy="9" r="4" fill={PRIMARY} />
-          <text x="36" y="14" fill={DARK} font-size="15">{s}</text>
+  <!-- 三个方向框 -->
+  {
+    tree.branches.map((b, i) => {
+      const dividerY = HEADER_H + b.sub.length * SUB_ITEM_H + DIVIDER_Y_OFF;
+      const labelY = dividerY + STUDENT_LABEL_OFF;
+      const firstLineY = labelY + STUDENT_LINE_H;
+      return (
+        <g transform={`translate(${xs[i]}, ${BRANCH_Y})`}>
+          <rect x="0" y="0" width={BW} height={heights[i]} rx="12" fill="#fff" stroke={PRIMARY} stroke-width="1.5" />
+          <path d={`M0 12 Q0 0 12 0 L${BW - 12} 0 Q${BW} 0 ${BW} 12 L${BW} ${HEADER_H} L0 ${HEADER_H} Z`} fill={SOFT} />
+          <text x="18" y="26" fill={PRIMARY} font-size="19" font-weight="700">{b.title}</text>
+          <text x="18" y="47" fill={MUTED} font-size="14">{b.count} 名成员</text>
+
+          {b.sub.map((s, j) => (
+            <g transform={`translate(0, ${SUB_TOP - 14 + j * SUB_ITEM_H})`}>
+              <circle cx="22" cy="9" r="4" fill={PRIMARY} />
+              <text x="36" y="14" fill={DARK} font-size="15">{s}</text>
+            </g>
+          ))}
+
+          <line x1="14" y1={dividerY} x2={BW - 14} y2={dividerY} stroke={LINE} stroke-width="1" />
+          <text x="18" y={labelY} fill={PRIMARY} font-size="13.5" font-weight="700">团队成员</text>
+          {b.studentLines.map((ln, k) => (
+            <text x="18" y={firstLineY + k * STUDENT_LINE_H} fill={DARK} font-size="13.5">{ln}</text>
+          ))}
         </g>
-      ))}
-    </g>
-  ))}
+      );
+    })
+  }
+
+  <!-- 应用场景行 -->
+  <text x={W / 2} y={SCEN_LABEL_Y} text-anchor="middle" fill={ACCENT} font-size="18" font-weight="700">应用场景</text>
+  {
+    tree.branches.map((b, i) => (
+      <g transform={`translate(${xs[i]}, ${SCEN_BOX_Y})`}>
+        <rect x="0" y="0" width={BW} height={SCEN_BOX_H} rx="12" fill={ACCENT_SOFT} stroke={ACCENT} stroke-width="1.5" />
+        {b.scenarioLines.map((ln, k) => (
+          <text x="18" y={22 + k * 22} fill={DARK} font-size="14">{ln}</text>
+        ))}
+      </g>
+    ))
+  }
 </svg>
 
 <style>
