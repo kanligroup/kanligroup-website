@@ -41,6 +41,7 @@ const publications = defineCollection({
     authors: z.string(),
     venue: z.string(),
     year: z.number(),
+    volume: z.string().optional(),
     doi: z.string().optional(),
     url: z.string().optional(),
     type: z.enum(['paper', 'patent', 'journal']).default('paper'),

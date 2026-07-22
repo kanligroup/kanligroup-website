@@ -28,7 +28,7 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
               {p.data.cover && <span class="badge">封面</span>}
               <br />
               <span class="muted">
-                {p.data.authors} · {p.data.venue} ({p.data.year})
+                {p.data.authors} · {p.data.venue}{p.data.volume ? ' ' + p.data.volume : ''} ({p.data.year})
               </span>
               {p.data.doi && <span> · <a href={`https://doi.org/${p.data.doi}`}>DOI</a></span>}
               {p.data.url && <span> · <a href={p.data.url}>链接</a></span>}
@@ -47,7 +47,7 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
             <p class="pub">
               <strong>{p.data.title}</strong><br />
               <span class="muted">
-                {p.data.authors} · {p.data.venue} ({p.data.year})
+                {p.data.authors} · {p.data.venue}{p.data.volume ? ' ' + p.data.volume : ''} ({p.data.year})
               </span>
               {p.data.doi && <span> · <a href={`https://doi.org/${p.data.doi}`}>DOI</a></span>}
               {p.data.url && <span> · <a href={p.data.url}>链接</a></span>}
