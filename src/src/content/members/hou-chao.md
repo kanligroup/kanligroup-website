@@ -1,7 +1,7 @@
 ---
 name: "侯超"
 role: "博士研究生"
-degree: "2020级"
+degree: "2018级"
 joint_training: true
 direction: "耐高温柔性多模态传感器"
 project: "柔性耐高温传感器（多参量分布式感知）"
