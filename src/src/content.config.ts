@@ -5,7 +5,7 @@ const directions = defineCollection({
   schema: z.object({
     title: z.string(),
     lead: z.string(),
-    coordinator: z.string(),
+    coordinator: z.string().optional(),
     order: z.number(),
   }),
 });

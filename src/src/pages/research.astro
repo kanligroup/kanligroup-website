@@ -35,7 +35,6 @@ const membersByDir = (title: string) =>
       {directions.map((d) => (
         <div class="card card--direction">
           <h3>{d.data.title}</h3>
-          <p class="muted">统筹：{d.data.coordinator}</p>
           <p class="dir-summary">{d.data.lead}</p>
           {membersByDir(d.data.title).length > 0 && (
             <p class="members">

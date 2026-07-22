@@ -1,18 +1,24 @@
 ---
 // 研究方向树状图：核心科学问题为根，分三个方向，每方向下列出子方向
+// 成员人数从 members collection 动态计算，避免与卡片不一致
+import { getCollection } from 'astro:content';
+
 const PRIMARY = "#1a4d8f";
 const SOFT = "#eef3f9";
 const LINE = "#b9c7da";
 const DARK = "#1f2d3d";
 const MUTED = "#5b6b7b";
 
+const members = await getCollection('members');
+const countFor = (title: string) =>
+  members.filter((m) => m.data.direction === title && !m.data.is_pi).length;
+
 const tree = {
   root: { title: "核心科学问题", sub: "以理论与应用力学为统摄 · 柔性载体上的分布式感知" },
   branches: [
     {
       title: "柔性电子微飞行器",
-      coordinator: "统筹：刘奕辰、谢宏伟",
-      count: 8,
+      count: countFor("柔性电子微飞行器"),
       sub: [
         "仿生三维微飞行器结构设计",
         "飞行力学与主动调控",
@@ -23,8 +29,7 @@ const tree = {
     },
     {
       title: "柔性耐高温传感与多模态感知",
-      coordinator: "统筹：侯超",
-      count: 6,
+      count: countFor("柔性耐高温传感与多模态感知"),
       sub: [
         "多参量分布式感知",
         "压力阵列化感知",
@@ -36,8 +41,7 @@ const tree = {
     },
     {
       title: "柔性纤维电子、软体智能体与神经接口",
-      coordinator: "统筹：朱彦臣",
-      count: 3,
+      count: countFor("柔性纤维电子、软体智能体与神经接口"),
       sub: [
         "摩擦纳米发电机纤维",
         "柔性混合传感与无线定位",
@@ -99,7 +103,7 @@ const H = BRANCH_Y + maxH + 26;
       <rect x="0" y="0" width={BW} height={heights[i]} rx="12" fill="#fff" stroke={PRIMARY} stroke-width="1.5" />
       <rect x="0" y="0" width={BW} height="54" rx="12" fill={SOFT} />
       <text x="18" y="26" fill={PRIMARY} font-size="19" font-weight="700">{b.title}</text>
-      <text x="18" y="46" fill={MUTED} font-size="14">{b.coordinator} · {b.count} 人</text>
+      <text x="18" y="47" fill={MUTED} font-size="14">{b.count} 名成员</text>
       {b.sub.map((s, j) => (
         <g transform={`translate(0, ${HEADER_H + j * ITEM_H})`}>
           <circle cx="22" cy="9" r="4" fill={PRIMARY} />
