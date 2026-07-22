@@ -4,6 +4,7 @@ authors: "Y Lyu, Z Xu, C Hou, Y Han, H Xie, C Zeng, L Yuan, K Li"
 venue: "Discover Sensors"
 year: 2026
 volume: "2 (1), 28"
+doi: "10.1007/s44397-026-00061-1"
 tags: [high-temp, pressure-sensor, flexible]
 ---
 
