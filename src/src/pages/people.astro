@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MemberCard from '../components/MemberCard.astro';
+import { getCollection } from 'astro:content';
+
+const all = await getCollection('members');
+const pi = all.filter((m) => m.data.is_pi);
+const phd = all
+  .filter((m) => m.data.role.includes('博士') && !m.data.is_pi)
+  .sort((a, b) => (a.data.degree ?? '').localeCompare(b.data.degree ?? ''));
+const master = all
+  .filter((m) => m.data.role.includes('硕士') && !m.data.is_pi)
+  .sort((a, b) => (a.data.degree ?? '').localeCompare(b.data.degree ?? ''));
+const students = [...phd, ...master];
+---
+
+<BaseLayout title="团队成员 · Kan Li Group">
+  <section class="block container">
+    <h2 class="section">课题组负责人</h2>
+    <div class="cards">
+      {pi.map((m) => <MemberCard member={m} />)}
+    </div>
+
+    <h2 class="section">在读博士生（{phd.length}）</h2>
+    <div class="cards">
+      {phd.map((m) => <MemberCard member={m} />)}
+    </div>
+
+    <h2 class="section">在读硕士生（{master.length}）</h2>
+    <div class="cards">
+      {master.map((m) => <MemberCard member={m} />)}
+    </div>
+
+    <p class="muted">课题组由厉侃教授领衔，现有 {students.length} 名研究生（{phd.length} 名博士生 + {master.length} 名硕士生）。</p>
+  </section>
+</BaseLayout>

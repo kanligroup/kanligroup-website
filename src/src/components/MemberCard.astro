@@ -1,0 +1,21 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props {
+  member: CollectionEntry<'members'>;
+}
+const { member } = Astro.props;
+const { name, role, degree, direction, project, email } = member.data;
+---
+
+<div class="card">
+  <div class="member-head">
+    <div class="m-avatar">{name.slice(0, 1)}</div>
+    <div>
+      <p class="m-name">{name}</p>
+      <p class="m-role"><span class="tag">{role}</span>{degree ? ' · ' + degree : ''}</p>
+    </div>
+  </div>
+  {direction && <p>方向：{direction}</p>}
+  {project && <p class="project">负责：{project}</p>}
+  {email && <p class="muted">{email}</p>}
+</div>

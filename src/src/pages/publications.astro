@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const all = (await getCollection('publications')).sort((a, b) => b.data.year - a.data.year);
+const featured = all.filter((p) => p.data.highlight);
+const rest = all.filter((p) => !p.data.highlight);
+
+// group rest by year
+const byYear = {};
+for (const p of rest) {
+  (byYear[p.data.year] ||= []).push(p);
+}
+const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
+---
+
+<BaseLayout title="研究成果 · Kan Li Group">
+  <section class="block container">
+    <h2 class="section">研究成果</h2>
+
+    {featured.length > 0 && (
+      <div class="prose">
+        <h3 class="sub">代表性论文</h3>
+        <div class="featured-list">
+          {featured.map((p) => (
+            <div class="pub featured">
+              <strong>{p.data.title}</strong>
+              {p.data.cover && <span class="badge">封面</span>}
+              <br />
+              <span class="muted">
+                {p.data.authors} · {p.data.venue} ({p.data.year})
+              </span>
+              {p.data.doi && <span> · <a href={`https://doi.org/${p.data.doi}`}>DOI</a></span>}
+              {p.data.url && <span> · <a href={p.data.url}>链接</a></span>}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <div class="prose">
+      <h3 class="sub">全部论文（按年份）</h3>
+      {years.map((y) => (
+        <div class="year-group">
+          <h4 class="year">{y}</h4>
+          {byYear[y].map((p) => (
+            <p class="pub">
+              <strong>{p.data.title}</strong><br />
+              <span class="muted">
+                {p.data.authors} · {p.data.venue} ({p.data.year})
+              </span>
+              {p.data.doi && <span> · <a href={`https://doi.org/${p.data.doi}`}>DOI</a></span>}
+              {p.data.url && <span> · <a href={p.data.url}>链接</a></span>}
+            </p>
+          ))}
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .sub {
+    margin-top: 1.6rem;
+    color: var(--accent);
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+  .featured-list {
+    display: grid;
+    gap: 14px;
+    margin: 0.4rem 0 1.6rem;
+  }
+  .pub { margin: 0.4rem 0; line-height: 1.45; }
+  .pub.featured {
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .year-group { margin-left: 2px; padding-left: 16px; border-left: 2px solid var(--line); }
+  .year { margin: 1.1rem 0 0.3rem; color: #566; font-size: 1rem; }
+  .badge {
+    display: inline-block; margin-left: 0.4rem; padding: 0 0.45rem;
+    font-size: 0.7rem; font-weight: 700; border-radius: 5px;
+    background: var(--primary); color: #fff; vertical-align: middle;
+  }
+</style>

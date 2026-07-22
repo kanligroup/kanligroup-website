@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const directions = (await getCollection('directions')).sort((a, b) => a.data.order - b.data.order);
+const members = await getCollection('members');
+const phdCount = members.filter((m) => m.data.role.includes('博士') && !m.data.is_pi).length;
+const masterCount = members.filter((m) => m.data.role.includes('硕士') && !m.data.is_pi).length;
+const publications = await getCollection('publications');
+---
+
+<BaseLayout>
+  <section class="hero">
+    <div class="container">
+      <span class="eyebrow">华中科技大学 · 智能制造装备与技术全国重点实验室</span>
+      <h1>Kan Li Group · 厉侃课题组</h1>
+      <p class="lede">以理论与应用力学为统摄，发展柔性载体上的分布式感知——聚焦柔性电子微飞行器、耐高温传感与软体智能体，为 Physical AI 提供感知基础设施与数据支撑。</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="/research">查看研究方向 →</a>
+        <a class="btn btn-ghost" href="/about">关于课题组</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block container">
+    <h2 class="section">研究方向</h2>
+    <div class="cards">
+      {directions.map((d) => (
+        <div class="card card--direction">
+          <h3>{d.data.title}</h3>
+          <p class="muted">统筹：{d.data.coordinator}</p>
+          <p>{d.data.lead}</p>
+        </div>
+      ))}
+    </div>
+    <p class="muted">
+      课题组由厉侃教授领衔，现有 {phdCount + masterCount} 名研究生（{phdCount} 名博士生 + {masterCount} 名硕士生）。
+      <a href="/people">查看团队 →</a>
+    </p>
+  </section>
+
+  <section class="block container">
+    <h2 class="section">近期成果</h2>
+    <div class="prose">
+      {publications.slice(0, 3).map((p) => (
+        <p>
+          <strong>{p.data.title}</strong><br />
+          <span class="muted">{p.data.authors} · {p.data.venue} ({p.data.year})</span>
+        </p>
+      ))}
+      <p><a href="/publications">全部研究成果 →</a></p>
+    </div>
+  </section>
+</BaseLayout>

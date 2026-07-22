@@ -1,0 +1,13 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props {
+  direction: CollectionEntry<'directions'>;
+}
+const { direction } = Astro.props;
+---
+
+<div class="card">
+  <h3>{direction.data.title}</h3>
+  <p class="muted">统筹：{direction.data.coordinator}</p>
+  <p>{direction.data.lead}</p>
+</div>

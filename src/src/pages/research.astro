@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import DirectionTree from '../components/DirectionTree.astro';
+
+const directions = (await getCollection('directions')).sort((a, b) => a.data.order - b.data.order);
+const members = await getCollection('members');
+const membersByDir = (title: string) =>
+  members.filter((m) => m.data.direction === title && !m.data.is_pi);
+---
+
+<BaseLayout title="研究方向 · Kan Li Group">
+  <section class="block container">
+    <h2 class="section">核心科学问题</h2>
+    <div class="prose">
+      <p class="lead-question">
+        如何在力、热、电多场耦合下，通过结构与材料的协同设计，使柔软、曲面乃至可飞行的载体具备分布式、原位、可共形的三维感知能力？
+      </p>
+      <p>
+        柔性电子与可延展结构的本质是一个力学问题：当器件被拉伸、弯曲或共形贴合于复杂曲面与可飞行载体时，其电学功能依赖于形变与多场耦合的精确调控。厉侃课题组以理论与应用力学为统摄，围绕柔性载体上的分布式感知这一核心科学问题，发展三类相互支撑的能力：在极端与曲面环境中稳定工作的柔性耐高温传感网络，构成分布式感知的基座；以微飞行器作为分布式空间感知节点，将三维感知从固定平台拓展至空中自组织覆盖；以及柔性纤维电子、软体智能体与神经接口，实现人机共融的柔性智能体。三者共同构成面向 Physical AI 的感知基础设施，为环境监测、航空装备与软体系统的自主决策提供数据支撑。
+      </p>
+    </div>
+  </section>
+
+  <section class="block container">
+    <h2 class="section">研究方向架构</h2>
+    <div class="tree-figure">
+      <DirectionTree />
+    </div>
+  </section>
+
+  <section class="block container">
+    <h2 class="section">研究方向</h2>
+    <div class="cards">
+      {directions.map((d) => (
+        <div class="card card--direction">
+          <h3>{d.data.title}</h3>
+          <p class="muted">统筹：{d.data.coordinator}</p>
+          <p>{d.data.lead}</p>
+          <div class="prose">{d.body ? <p>{d.body}</p> : null}</div>
+          {membersByDir(d.data.title).length > 0 && (
+            <p class="members">
+              <span class="muted">成员：</span>
+              {membersByDir(d.data.title).map((m, i) => (
+                <span>{m.data.name}{i < membersByDir(d.data.title).length - 1 ? '、' : ''}</span>
+              ))}
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

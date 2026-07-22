@@ -1,0 +1,121 @@
+---
+// 研究方向树状图：核心科学问题为根，分三个方向，每方向下列出子方向
+const PRIMARY = "#1a4d8f";
+const SOFT = "#eef3f9";
+const LINE = "#b9c7da";
+const DARK = "#1f2d3d";
+const MUTED = "#5b6b7b";
+
+const tree = {
+  root: { title: "核心科学问题", sub: "以理论与应用力学为统摄 · 柔性载体上的分布式感知" },
+  branches: [
+    {
+      title: "柔性电子微飞行器",
+      coordinator: "统筹：刘奕辰、谢宏伟",
+      count: 8,
+      sub: [
+        "仿生三维微飞行器结构设计",
+        "飞行力学与主动调控",
+        "感知–通信–驱动一体化系统集成",
+        "无线组网与低功耗图传",
+        "旋翼健康监测",
+      ],
+    },
+    {
+      title: "柔性耐高温传感与多模态感知",
+      coordinator: "统筹：侯超",
+      count: 6,
+      sub: [
+        "多参量分布式感知",
+        "压力阵列化感知",
+        "纳米尺度效应及原位感知",
+        "柔性PZT薄膜压电传感",
+        "柔性多模态传感",
+        "柔性蒙皮",
+      ],
+    },
+    {
+      title: "柔性纤维电子、软体智能体与神经接口",
+      coordinator: "统筹：朱彦臣",
+      count: 3,
+      sub: [
+        "摩擦纳米发电机纤维",
+        "柔性混合传感与无线定位",
+        "模块化柔性机器人与软体驱动",
+        "侵入式脑机接口",
+      ],
+    },
+  ],
+};
+
+const W = 1120;
+const BW = 344;
+const GAP = (W - BW * 3) / 4;
+const ROOT_W = 560;
+const ROOT_X = (W - ROOT_W) / 2;
+const ROOT_Y = 24;
+const ROOT_H = 72;
+const BUS_Y = 150;
+const BRANCH_Y = 210;
+const HEADER_H = 64;
+const ITEM_H = 22;
+const PAD = 14;
+
+const centers = tree.branches.map((_, i) => GAP + i * (BW + GAP) + BW / 2);
+const xs = tree.branches.map((_, i) => GAP + i * (BW + GAP));
+const heights = tree.branches.map((b) => HEADER_H + b.sub.length * ITEM_H + PAD);
+const maxH = Math.max(...heights);
+const H = BRANCH_Y + maxH + 20;
+---
+
+<svg
+  class="dir-tree"
+  viewBox={`0 0 ${W} ${H}`}
+  role="img"
+  aria-label="研究方向树状图"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- connectors -->
+  <g stroke={LINE} stroke-width="2" fill="none">
+    <line x1={W / 2} y1={ROOT_Y + ROOT_H} x2={W / 2} y2={BUS_Y} />
+    <line x1={centers[0]} y1={BUS_Y} x2={centers[centers.length - 1]} y2={BUS_Y} />
+    {centers.map((cx) => <line x1={cx} y1={BUS_Y} x2={cx} y2={BRANCH_Y} />)}
+  </g>
+
+  <!-- root -->
+  <g>
+    <rect x={ROOT_X} y={ROOT_Y} width={ROOT_W} height={ROOT_H} rx="10" fill={PRIMARY} />
+    <text x={W / 2} y={ROOT_Y + 30} text-anchor="middle" fill="#fff" font-size="20" font-weight="700">
+      {tree.root.title}
+    </text>
+    <text x={W / 2} y={ROOT_Y + 54} text-anchor="middle" fill="#dce7f5" font-size="13">
+      {tree.root.sub}
+    </text>
+  </g>
+
+  <!-- branches -->
+  {tree.branches.map((b, i) => (
+    <g transform={`translate(${xs[i]}, ${BRANCH_Y})`}>
+      <rect x="0" y="0" width={BW} height={heights[i]} rx="10" fill="#fff" stroke={PRIMARY} stroke-width="1.5" />
+      <rect x="0" y="0" width={BW} height="46" rx="10" fill={SOFT} />
+      <text x="16" y="22" fill={PRIMARY} font-size="16" font-weight="700">{b.title}</text>
+      <text x="16" y="40" fill={MUTED} font-size="12">{b.coordinator} · {b.count} 人</text>
+      {b.sub.map((s, j) => (
+        <g transform={`translate(0, ${HEADER_H + j * ITEM_H})`}>
+          <circle cx="20" cy="6" r="3" fill={PRIMARY} />
+          <text x="32" y="10" fill={DARK} font-size="13">{s}</text>
+        </g>
+      ))}
+    </g>
+  ))}
+</svg>
+
+<style>
+  .dir-tree {
+    width: 100%;
+    height: auto;
+    max-width: 1120px;
+    margin: 8px auto 28px;
+    display: block;
+  }
+</style>
