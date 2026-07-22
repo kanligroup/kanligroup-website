@@ -51,4 +51,15 @@ const publications = defineCollection({
   }),
 });
 
-export const collections = { directions, members, publications };
+const news = defineCollection({
+  type: 'content',
+  schema: z.object({
+    date: z.coerce.date(),
+    title: z.string(),
+    excerpt: z.string().optional(),
+    tag: z.string().optional(),
+    link: z.string().optional(),
+  }),
+});
+
+export const collections = { directions, members, publications, news };

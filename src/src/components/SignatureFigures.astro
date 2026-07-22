@@ -1,0 +1,158 @@
+---
+// 标志性研究：三个方向的示意性配图（内联 SVG）。
+// 若要替换为真实图片/视频：把对应 figure 的 media 换成
+//   <img src="/research/xxx.jpg" alt="..." /> 或 <video src="/research/xxx.mp4" controls />
+// 并把文件放入 public/research/ 目录即可（当前为品牌示意插画，非真实照片）。
+const figures = [
+  {
+    title: "柔性电子微飞行器",
+    caption: "受风传种子启发的三维微飞行器，可集成感知–通信–驱动，构建分布式空间感知节点（Nature 2021 封面）。",
+    color: "#1a4d8f",
+    soft: "#eaf1fa",
+  },
+  {
+    title: "耐高温柔性多模态传感器",
+    caption: "共形于发动机热端与复杂曲面的柔性多模态传感，面向极端环境结构健康监测。",
+    color: "#0f6e58",
+    soft: "#e6f2ef",
+  },
+  {
+    title: "柔性智能微系统",
+    caption: "纤维电子、软体驱动与神经接口融合的柔性智能微系统，实现人–机–环协同。",
+    color: "#7c3aed",
+    soft: "#f1ebfd",
+  },
+];
+---
+
+<div class="fig-grid">
+  {
+    figures.map((f) => (
+      <figure class="fig-card" style={`--fc:${f.color};--fs:${f.soft}`}>
+        <div class="fig-media">
+          {f.title === "柔性电子微飞行器" && (
+            <svg viewBox="0 0 400 240" role="img" aria-label="柔性电子微飞行器示意">
+              <defs>
+                <radialGradient id="fig1bg" cx="50%" cy="42%" r="62%">
+                  <stop offset="0%" stop-color={f.soft} />
+                  <stop offset="100%" stop-color="#fff" />
+                </radialGradient>
+              </defs>
+              <rect width="400" height="240" fill="url(#fig1bg)" />
+              <g transform="translate(200 118)" fill="none" stroke={f.color} stroke-width="2.4">
+                {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => (
+                  <g transform={`rotate(${a})`}>
+                    <path d="M0 0 C 34 -10 70 -10 96 6 C 70 14 34 12 0 6 Z" fill={f.color} fill-opacity="0.14" />
+                    <circle cx="92" cy="6" r="4" fill={f.color} fill-opacity="0.9" stroke="none" />
+                  </g>
+                ))}
+                <circle r="17" fill={f.color} fill-opacity="0.9" stroke="none" />
+                <circle r="7" fill="#fff" stroke="none" />
+              </g>
+              <path d="M70 196 q 60 26 130 8" stroke={f.color} stroke-width="2" fill="none" stroke-dasharray="2 7" stroke-linecap="round" opacity="0.55" />
+              <path d="M86 210 q 70 22 140 4" stroke={f.color} stroke-width="2" fill="none" stroke-dasharray="2 7" stroke-linecap="round" opacity="0.35" />
+            </svg>
+          )}
+
+          {f.title === "耐高温柔性多模态传感器" && (
+            <svg viewBox="0 0 400 240" role="img" aria-label="耐高温柔性多模态传感器示意">
+              <defs>
+                <linearGradient id="fig2bg" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color={f.soft} />
+                  <stop offset="100%" stop-color="#fff" />
+                </linearGradient>
+              </defs>
+              <rect width="400" height="240" fill="url(#fig2bg)" />
+              <path d="M40 200 Q 200 70 360 200 L 360 220 Q 200 96 40 220 Z" fill={f.color} fill-opacity="0.16" stroke={f.color} stroke-width="2.4" />
+              <g stroke={f.color} stroke-width="1.6" opacity="0.8">
+                {[-110, -55, 0, 55, 110].map((dx) => (
+                  <path d={`M${200 + dx} 150 q 14 -34 28 0`} fill="none" />
+                ))}
+              </g>
+              <g fill={f.color}>
+                {[-110, -55, 0, 55, 110].map((dx, i) => (
+                  <circle cx={200 + dx} cy={150 - Math.abs(dx) * 0.18} r="4.5" opacity={0.9 - i * 0.04} />
+                ))}
+              </g>
+              <g stroke="#e0573a" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.85">
+                <path d="M150 54 q 8 -16 0 -30 q -8 14 0 30" />
+                <path d="M200 44 q 9 -18 0 -34 q -9 16 0 34" />
+                <path d="M250 54 q 8 -16 0 -30 q -8 14 0 30" />
+              </g>
+            </svg>
+          )}
+
+          {f.title === "柔性智能微系统" && (
+            <svg viewBox="0 0 400 240" role="img" aria-label="柔性智能微系统示意">
+              <defs>
+                <radialGradient id="fig3bg" cx="50%" cy="46%" r="64%">
+                  <stop offset="0%" stop-color={f.soft} />
+                  <stop offset="100%" stop-color="#fff" />
+                </radialGradient>
+              </defs>
+              <rect width="400" height="240" fill="url(#fig3bg)" />
+              <g fill="none" stroke={f.color} stroke-width="2.4" stroke-linecap="round">
+                <path d="M60 60 C 140 30 150 150 230 110 C 300 76 300 170 350 150" />
+                <path d="M60 110 C 150 80 150 190 240 150 C 310 118 300 200 350 185" opacity="0.7" />
+                <path d="M70 160 C 150 130 160 210 250 185 C 310 168 305 215 350 205" opacity="0.5" />
+              </g>
+              <g fill={f.color}>
+                <circle cx="120" cy="64" r="5" />
+                <circle cx="190" cy="118" r="5" />
+                <circle cx="262" cy="128" r="5" />
+                <circle cx="150" cy="150" r="4" opacity="0.8" />
+                <circle cx="232" cy="178" r="4" opacity="0.8" />
+              </g>
+            </svg>
+          )}
+        </div>
+        <figcaption>
+          <h3>{f.title}</h3>
+          <p>{f.caption}</p>
+        </figcaption>
+      </figure>
+    ))
+  }
+</div>
+
+<style>
+  .fig-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+    margin: 22px 0 6px;
+  }
+  .fig-card {
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .fig-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: #c9d8ec;
+  }
+  .fig-media {
+    aspect-ratio: 5 / 3;
+    background: var(--fs);
+    border-bottom: 3px solid var(--fc);
+  }
+  .fig-media svg { width: 100%; height: 100%; display: block; }
+  .fig-card figcaption { padding: 16px 18px 20px; }
+  .fig-card figcaption h3 {
+    margin: 0 0 8px;
+    font-size: 16.5px;
+    font-weight: 700;
+    color: var(--fc);
+  }
+  .fig-card figcaption p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.62;
+    color: var(--text);
+  }
+</style>

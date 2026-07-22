@@ -1,12 +1,27 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import SignatureFigures from '../components/SignatureFigures.astro';
 
 const directions = (await getCollection('directions')).sort((a, b) => a.data.order - b.data.order);
 const members = await getCollection('members');
 const phdCount = members.filter((m) => m.data.role.includes('博士') && !m.data.is_pi && !m.data.alumni).length;
 const masterCount = members.filter((m) => m.data.role.includes('硕士') && !m.data.is_pi && !m.data.alumni).length;
 const publications = await getCollection('publications');
+
+// 近期成果：近几年的代表性工作（2022 起，按年份倒序）
+const recentPubs = publications
+  .filter((p) => p.data.year >= 2022)
+  .sort((a, b) => b.data.year - a.data.year)
+  .slice(0, 6);
+
+// 最新进展：按日期倒序取前 5 条
+const news = (await getCollection('news'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 5);
+
+const fmtDate = (d: Date) =>
+  `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}`;
 ---
 
 <BaseLayout>
@@ -23,32 +38,62 @@ const publications = await getCollection('publications');
   </section>
 
   <section class="block container">
-    <h2 class="section">研究方向</h2>
-    <div class="cards">
-      {directions.map((d) => (
-        <div class="card card--direction">
-          <h3>{d.data.title}</h3>
-          <p class="muted">统筹：{d.data.coordinator}</p>
-          <p>{d.data.lead}</p>
-        </div>
-      ))}
-    </div>
-    <p class="muted">
+    <h2 class="section">标志性研究</h2>
+    <p class="muted">面向 Physical AI 的柔性载体分布式感知——三个相互支撑的研究方向。</p>
+    <SignatureFigures />
+    <p class="muted" style="margin-top:14px">
       课题组由厉侃教授领衔，现有 {phdCount + masterCount} 名研究生（{phdCount} 名博士生 + {masterCount} 名硕士生）。
       <a href="/people">查看团队 →</a>
     </p>
   </section>
 
   <section class="block container">
-    <h2 class="section">近期成果</h2>
-    <div class="prose">
-      {publications.slice(0, 3).map((p) => (
-        <p>
-          <strong>{p.data.title}</strong><br />
-          <span class="muted">{p.data.authors} · {p.data.venue} ({p.data.year})</span>
-        </p>
+    <h2 class="section">研究方向</h2>
+    <div class="cards">
+      {directions.map((d) => (
+        <div class="card card--direction">
+          <h3>{d.data.title}</h3>
+          <p class="dir-summary">{d.data.lead}</p>
+        </div>
       ))}
-      <p><a href="/publications">全部研究成果 →</a></p>
     </div>
+    <p class="muted">
+      <a href="/research">查看完整研究方向架构 →</a>
+    </p>
+  </section>
+
+  <section class="block container">
+    <h2 class="section">近期成果</h2>
+    <p class="muted">近几年有代表性的工作（按发表年份倒序）。</p>
+    <ul class="pub-list">
+      {recentPubs.map((p) => (
+        <li class="pub-item">
+          <span class="pub-year">{p.data.year}</span>
+          <div class="pub-body">
+            <a class="pub-title" href={p.data.url || '/publications'}>{p.data.title}</a>
+            <p class="pub-meta">{p.data.authors} · {p.data.venue}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+    <p class="muted"><a href="/publications">全部研究成果 →</a></p>
+  </section>
+
+  <section class="block container">
+    <h2 class="section">最新进展</h2>
+    <p class="muted">课题组前沿要闻与研究动态。</p>
+    <ul class="news-list">
+      {news.map((n) => (
+        <li class="news-item">
+          <span class="news-date">{fmtDate(n.data.date)}</span>
+          {n.data.tag && <span class="news-tag">{n.data.tag}</span>}
+          <div class="news-body">
+            <a class="news-title" href={n.data.link || '/news'}>{n.data.title}</a>
+            {n.data.excerpt && <p class="news-excerpt">{n.data.excerpt}</p>}
+          </div>
+        </li>
+      ))}
+    </ul>
+    <p class="muted"><a href="/news">查看全部进展 →</a></p>
   </section>
 </BaseLayout>
