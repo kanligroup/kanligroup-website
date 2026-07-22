@@ -241,6 +241,12 @@ h2.section {
   background: linear-gradient(90deg, var(--primary), var(--accent));
 }
 .card p { margin: 6px 0; }
+.card .dir-summary {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text);
+  margin-top: 10px;
+}
 
 /* ---------- Prose & lead question ---------- */
 .prose { max-width: 780px; }

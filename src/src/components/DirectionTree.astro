@@ -51,21 +51,21 @@ const tree = {
 const W = 1120;
 const BW = 344;
 const GAP = (W - BW * 3) / 4;
-const ROOT_W = 560;
+const ROOT_W = 580;
 const ROOT_X = (W - ROOT_W) / 2;
-const ROOT_Y = 24;
-const ROOT_H = 72;
-const BUS_Y = 150;
-const BRANCH_Y = 210;
-const HEADER_H = 64;
-const ITEM_H = 22;
-const PAD = 14;
+const ROOT_Y = 26;
+const ROOT_H = 88;
+const BUS_Y = 162;
+const BRANCH_Y = 228;
+const HEADER_H = 76;
+const ITEM_H = 30;
+const PAD = 18;
 
 const centers = tree.branches.map((_, i) => GAP + i * (BW + GAP) + BW / 2);
 const xs = tree.branches.map((_, i) => GAP + i * (BW + GAP));
 const heights = tree.branches.map((b) => HEADER_H + b.sub.length * ITEM_H + PAD);
 const maxH = Math.max(...heights);
-const H = BRANCH_Y + maxH + 20;
+const H = BRANCH_Y + maxH + 26;
 ---
 
 <svg
@@ -76,7 +76,7 @@ const H = BRANCH_Y + maxH + 20;
   xmlns="http://www.w3.org/2000/svg"
 >
   <!-- connectors -->
-  <g stroke={LINE} stroke-width="2" fill="none">
+  <g stroke={LINE} stroke-width="2.5" fill="none">
     <line x1={W / 2} y1={ROOT_Y + ROOT_H} x2={W / 2} y2={BUS_Y} />
     <line x1={centers[0]} y1={BUS_Y} x2={centers[centers.length - 1]} y2={BUS_Y} />
     {centers.map((cx) => <line x1={cx} y1={BUS_Y} x2={cx} y2={BRANCH_Y} />)}
@@ -84,11 +84,11 @@ const H = BRANCH_Y + maxH + 20;
 
   <!-- root -->
   <g>
-    <rect x={ROOT_X} y={ROOT_Y} width={ROOT_W} height={ROOT_H} rx="10" fill={PRIMARY} />
-    <text x={W / 2} y={ROOT_Y + 30} text-anchor="middle" fill="#fff" font-size="20" font-weight="700">
+    <rect x={ROOT_X} y={ROOT_Y} width={ROOT_W} height={ROOT_H} rx="12" fill={PRIMARY} />
+    <text x={W / 2} y={ROOT_Y + 36} text-anchor="middle" fill="#fff" font-size="25" font-weight="700">
       {tree.root.title}
     </text>
-    <text x={W / 2} y={ROOT_Y + 54} text-anchor="middle" fill="#dce7f5" font-size="13">
+    <text x={W / 2} y={ROOT_Y + 64} text-anchor="middle" fill="#dce7f5" font-size="14.5">
       {tree.root.sub}
     </text>
   </g>
@@ -96,14 +96,14 @@ const H = BRANCH_Y + maxH + 20;
   <!-- branches -->
   {tree.branches.map((b, i) => (
     <g transform={`translate(${xs[i]}, ${BRANCH_Y})`}>
-      <rect x="0" y="0" width={BW} height={heights[i]} rx="10" fill="#fff" stroke={PRIMARY} stroke-width="1.5" />
-      <rect x="0" y="0" width={BW} height="46" rx="10" fill={SOFT} />
-      <text x="16" y="22" fill={PRIMARY} font-size="16" font-weight="700">{b.title}</text>
-      <text x="16" y="40" fill={MUTED} font-size="12">{b.coordinator} · {b.count} 人</text>
+      <rect x="0" y="0" width={BW} height={heights[i]} rx="12" fill="#fff" stroke={PRIMARY} stroke-width="1.5" />
+      <rect x="0" y="0" width={BW} height="54" rx="12" fill={SOFT} />
+      <text x="18" y="26" fill={PRIMARY} font-size="19" font-weight="700">{b.title}</text>
+      <text x="18" y="46" fill={MUTED} font-size="14">{b.coordinator} · {b.count} 人</text>
       {b.sub.map((s, j) => (
         <g transform={`translate(0, ${HEADER_H + j * ITEM_H})`}>
-          <circle cx="20" cy="6" r="3" fill={PRIMARY} />
-          <text x="32" y="10" fill={DARK} font-size="13">{s}</text>
+          <circle cx="22" cy="9" r="4" fill={PRIMARY} />
+          <text x="36" y="14" fill={DARK} font-size="15">{s}</text>
         </g>
       ))}
     </g>
@@ -114,7 +114,7 @@ const H = BRANCH_Y + maxH + 20;
   .dir-tree {
     width: 100%;
     height: auto;
-    max-width: 1120px;
+    max-width: 1000px;
     margin: 8px auto 28px;
     display: block;
   }
