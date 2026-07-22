@@ -24,21 +24,6 @@ const namesFor = (title: string) =>
     .filter((m) => m.data.direction === title && !m.data.is_pi)
     .map((m) => m.data.name);
 
-// 长句按字符换行（应用场景）
-function wrapChars(str: string, max: number): string[] {
-  const lines: string[] = [];
-  let cur = '';
-  for (const ch of str) {
-    cur += ch;
-    if (cur.length >= max) {
-      lines.push(cur);
-      cur = '';
-    }
-  }
-  if (cur) lines.push(cur);
-  return lines;
-}
-
 // 成员 pill 布局：贪心换行
 const CHIP_FONT = 12.5;
 const CHIP_PAD_X = 11;
@@ -62,8 +47,14 @@ const tree = {
         "感知–通信–驱动一体化系统集成",
         "无线组网与低功耗图传",
       ],
-      scenario:
-        "空地协同的分布式感知节点：面向灾害救援、精准农业与狭窄空间的群体监测，构成 Physical AI 的空间感知前端。",
+      scenario: {
+        lead: "空地协同感知节点",
+        points: [
+          "临近空间分布式组网",
+          "星球探测感知前端",
+          "环境监测与污染吸附",
+        ],
+      },
     },
     {
       title: "耐高温柔性多模态传感器",
@@ -75,8 +66,14 @@ const tree = {
         "柔性多模态传感",
         "柔性蒙皮",
       ],
-      scenario:
-        "极端环境下的结构健康监测：航空发动机与燃机热端部件、复杂曲面蒙皮的共形多参量感知与装备预测性维护。",
+      scenario: {
+        lead: "极端环境结构监测",
+        points: [
+          "航空发动机热端监测",
+          "水星/木星极端探测",
+          "核工业与工业监测",
+        ],
+      },
     },
     {
       title: "柔性智能微系统",
@@ -87,20 +84,23 @@ const tree = {
         "侵入式脑机接口",
         "旋翼健康监测（韩炎岐）",
       ],
-      scenario:
-        "人–机–环融合的智能终端：可穿戴/植入式健康监测、软体机器人感知–驱动一体与神经接口康复。",
+      scenario: {
+        lead: "人–机–环融合终端",
+        points: [
+          "可穿戴/植入健康监测",
+          "软体机器人感驱一体",
+          "神经接口与康复",
+        ],
+      },
     },
   ],
 };
 
-// 补全每个分支：配色、成员 pill 布局、场景换行
-const SCEN_MAX = 16;
+// 补全每个分支：配色、成员 pill 布局
 tree.branches.forEach((b, i) => {
   const names = namesFor(b.title);
   b.count = names.length;
   b.color = palette[i];
-
-  b.scenarioLines = wrapChars(b.scenario, SCEN_MAX);
 
   const chips: { x: number; y: number; w: number; label: string }[] = [];
   let cx = 18;
@@ -150,10 +150,13 @@ const heights = tree.branches.map((b) => {
 const maxBranchH = Math.max(...heights);
 
 // 应用场景行
+const SCEN_LEAD_Y = 32;
+const SCEN_POINT_TOP = 52;
+const SCEN_POINT_H = 23;
 const SCEN_LABEL_Y = BRANCH_Y + maxBranchH + 44;
 const SCEN_BOX_Y = SCEN_LABEL_Y + 30;
-const maxScenLines = Math.max(...tree.branches.map((b) => b.scenarioLines.length));
-const SCEN_BOX_H = 18 + maxScenLines * 23 + 18;
+const maxPoints = Math.max(...tree.branches.map((b) => b.scenario.points.length));
+const SCEN_BOX_H = SCEN_POINT_TOP + maxPoints * SCEN_POINT_H + 14;
 
 const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
 ---
@@ -258,8 +261,12 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
             <rect x="0" y="0" width={BW} height={SCEN_BOX_H} rx="14" fill={col.soft2} stroke={col.main} stroke-width="1.5" />
           </g>
           <line x1="15" y1="16" x2="15" y2={SCEN_BOX_H - 16} stroke={col.main} stroke-width="3.5" stroke-linecap="round" />
-          {b.scenarioLines.map((ln, k) => (
-            <text x="28" y={24 + k * 23} fill={DARK} font-size="14">{ln}</text>
+          <text x="28" y={SCEN_LEAD_Y} fill={col.main} font-size="14.5" font-weight="700">{b.scenario.lead}</text>
+          {b.scenario.points.map((p, k) => (
+            <g transform={`translate(0, ${SCEN_POINT_TOP + k * SCEN_POINT_H})`}>
+              <circle cx="32" cy="5" r="3" fill={col.main} />
+              <text x="42" y="10" fill={DARK} font-size="13">{p}</text>
+            </g>
           ))}
         </g>
       );
