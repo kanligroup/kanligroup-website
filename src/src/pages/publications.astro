@@ -4,7 +4,8 @@ import { getCollection } from 'astro:content';
 
 const all = (await getCollection('publications')).sort((a, b) => b.data.year - a.data.year);
 const featured = all.filter((p) => p.data.highlight);
-const rest = all.filter((p) => !p.data.highlight);
+// 代表性论文仍单列于顶部，但完整年份列表包含全部论文（含代表性），不再因 highlight 被剔除
+const rest = all;
 
 // group rest by year
 const byYear = {};
