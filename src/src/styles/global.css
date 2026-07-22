@@ -278,6 +278,13 @@ h2.section {
   margin: 0 auto;
   display: block;
 }
+.tree-caption {
+  margin: 14px 4px 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13.5px;
+  letter-spacing: 0.2px;
+}
 
 /* ---------- Member card extras ---------- */
 .member-head { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }

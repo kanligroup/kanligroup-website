@@ -1,16 +1,20 @@
 ---
 // 研究方向架构图：核心科学问题为根，分三个方向；
-// 每个方向框内列出子方向与团队成员；底部新增「应用场景」一行，分别对应三个方向。
+// 每个方向框内列出子方向与团队成员（以彩色 pill 呈现）；底部「应用场景」一行对应三个方向。
 // 成员与人数均从 members collection 动态计算，避免与页面其它处不一致。
 import { getCollection } from 'astro:content';
 
 const PRIMARY = "#1a4d8f";
-const SOFT = "#eef3f9";
-const ACCENT = "#0f6e58";      // 应用场景行配色
-const ACCENT_SOFT = "#e6f2ef";
-const LINE = "#b9c7da";
+const LINE = "#c2cedd";
 const DARK = "#1f2d3d";
 const MUTED = "#5b6b7b";
+
+// 三个方向各自的配色（蓝 / 青绿 / 紫），用于顶条、子项圆点、成员 pill、应用场景强调
+const palette = [
+  { main: "#1a4d8f", soft: "#eaf1fa", soft2: "#f5f9fd" },
+  { main: "#0f6e58", soft: "#e6f2ef", soft2: "#f3faf8" },
+  { main: "#7c3aed", soft: "#f1ebfd", soft2: "#faf7fe" },
+];
 
 const members = await getCollection('members');
 
@@ -20,23 +24,7 @@ const namesFor = (title: string) =>
     .filter((m) => m.data.direction === title && !m.data.is_pi)
     .map((m) => m.data.name);
 
-// 保持词完整的换行（中文按字符等宽，按 token 包裹避免切坏人名）
-function wrapTokens(tokens: string[], max: number): string[] {
-  const lines: string[] = [];
-  let cur = '';
-  for (const t of tokens) {
-    if (cur.length + t.length > max && cur.length > 0) {
-      lines.push(cur);
-      cur = t;
-    } else {
-      cur += t;
-    }
-  }
-  if (cur) lines.push(cur);
-  return lines;
-}
-
-// 长句按字符换行
+// 长句按字符换行（应用场景）
 function wrapChars(str: string, max: number): string[] {
   const lines: string[] = [];
   let cur = '';
@@ -49,6 +37,18 @@ function wrapChars(str: string, max: number): string[] {
   }
   if (cur) lines.push(cur);
   return lines;
+}
+
+// 成员 pill 布局：贪心换行
+const CHIP_FONT = 12.5;
+const CHIP_PAD_X = 11;
+const CHIP_H = 24;
+const CHIP_GAP_X = 7;
+const CHIP_GAP_Y = 7;
+const BW_CONTENT = 308; // 框内可用宽度
+
+function chipWidth(name: string): number {
+  return name.length * CHIP_FONT + CHIP_PAD_X * 2;
 }
 
 const tree = {
@@ -93,15 +93,31 @@ const tree = {
   ],
 };
 
-// 为每个分支补全成员与换行后的文本行
-const STUDENT_MAX = 20;
-const SCEN_MAX = 17;
-tree.branches.forEach((b) => {
+// 补全每个分支：配色、成员 pill 布局、场景换行
+const SCEN_MAX = 16;
+tree.branches.forEach((b, i) => {
   const names = namesFor(b.title);
   b.count = names.length;
-  const tokens = names.map((n, i) => (i < names.length - 1 ? n + "、" : n));
-  b.studentLines = wrapTokens(tokens, STUDENT_MAX);
+  b.color = palette[i];
+
   b.scenarioLines = wrapChars(b.scenario, SCEN_MAX);
+
+  const chips: { x: number; y: number; w: number; label: string }[] = [];
+  let cx = 18;
+  let cy = 0;
+  let maxY = 0;
+  names.forEach((n) => {
+    const w = chipWidth(n);
+    if (cx + w > 18 + BW_CONTENT && chips.length > 0) {
+      cx = 18;
+      cy += CHIP_H + CHIP_GAP_Y;
+      maxY = cy;
+    }
+    chips.push({ x: cx, y: cy, w, label: n });
+    cx += w + CHIP_GAP_X;
+  });
+  b.chips = chips;
+  b.chipRows = names.length ? maxY / (CHIP_H + CHIP_GAP_Y) + 1 : 0;
 });
 
 // 布局常量
@@ -110,36 +126,36 @@ const BW = 344;
 const GAP = (W - BW * 3) / 4;
 const ROOT_W = 580;
 const ROOT_X = (W - ROOT_W) / 2;
-const ROOT_Y = 26;
-const ROOT_H = 88;
-const BUS_Y = 162;
-const BRANCH_Y = 228;
-const HEADER_H = 56;
-const SUB_ITEM_H = 28;
-const SUB_TOP = HEADER_H + 16;       // 第一个子方向文字基线
-const DIVIDER_Y_OFF = 6;
-const STUDENT_LABEL_OFF = 20;
-const STUDENT_LINE_H = 21;
+const ROOT_Y = 28;
+const ROOT_H = 92;
+const BUS_Y = 168;
+const BRANCH_Y = 236;
+const HEADER_H = 60;
+const SUB_ITEM_H = 27;
+const FIRST_SUB_BASE = HEADER_H + 25;   // 第一个子方向文字基线
+const DIVIDER_OFF = 10;
+const LABEL_OFF = 26;                    // 「团队成员」相对分隔线的偏移
 const BOTTOM_PAD = 16;
 
 const xs = tree.branches.map((_, i) => GAP + i * (BW + GAP));
 const centers = tree.branches.map((_, i) => xs[i] + BW / 2);
 
 const heights = tree.branches.map((b) => {
-  const dividerY = HEADER_H + b.sub.length * SUB_ITEM_H + DIVIDER_Y_OFF;
-  const labelY = dividerY + STUDENT_LABEL_OFF;
-  const firstLineY = labelY + STUDENT_LINE_H;
-  return firstLineY + (b.studentLines.length - 1) * STUDENT_LINE_H + BOTTOM_PAD;
+  const dividerY = HEADER_H + b.sub.length * SUB_ITEM_H + DIVIDER_OFF;
+  const labelY = dividerY + LABEL_OFF;
+  const chipsTop = labelY + 12;
+  const chipsBottom = chipsTop + (b.chipRows > 0 ? b.chipRows * CHIP_H + (b.chipRows - 1) * CHIP_GAP_Y : 0);
+  return chipsBottom + BOTTOM_PAD;
 });
 const maxBranchH = Math.max(...heights);
 
 // 应用场景行
-const SCEN_LABEL_Y = BRANCH_Y + maxBranchH + 40;
-const SCEN_BOX_Y = SCEN_LABEL_Y + 28;
+const SCEN_LABEL_Y = BRANCH_Y + maxBranchH + 44;
+const SCEN_BOX_Y = SCEN_LABEL_Y + 30;
 const maxScenLines = Math.max(...tree.branches.map((b) => b.scenarioLines.length));
-const SCEN_BOX_H = 16 + maxScenLines * 22 + 16;
+const SCEN_BOX_H = 18 + maxScenLines * 23 + 18;
 
-const H = SCEN_BOX_Y + SCEN_BOX_H + 26;
+const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
 ---
 
 <svg
@@ -149,49 +165,82 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 26;
   aria-label="研究方向架构图"
   xmlns="http://www.w3.org/2000/svg"
 >
+  <defs>
+    <linearGradient id="rootGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#16458a" />
+      <stop offset="100%" stop-color="#2b6fb5" />
+    </linearGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#1f2d3d" flood-opacity="0.14" />
+    </filter>
+    <filter id="lightShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1f2d3d" flood-opacity="0.10" />
+    </filter>
+  </defs>
+
+  <!-- 背景面板 -->
+  <rect x="0" y="0" width={W} height={H} rx="18" fill="#f7f9fc" stroke="#eaeef4" stroke-width="1" />
+
   <!-- 连接线 -->
-  <g stroke={LINE} stroke-width="2.5" fill="none">
+  <g stroke={LINE} stroke-width="2.5" fill="none" stroke-linecap="round">
     <line x1={W / 2} y1={ROOT_Y + ROOT_H} x2={W / 2} y2={BUS_Y} />
     <line x1={centers[0]} y1={BUS_Y} x2={centers[centers.length - 1]} y2={BUS_Y} />
     {centers.map((cx) => <line x1={cx} y1={BUS_Y} x2={cx} y2={BRANCH_Y} />)}
     {centers.map((cx) => <line x1={cx} y1={BRANCH_Y + maxBranchH} x2={cx} y2={SCEN_BOX_Y} />)}
   </g>
+  <!-- 连接节点圆点 -->
+  <g fill={PRIMARY}>
+    <circle cx={W / 2} cy={BUS_Y} r="4.5" />
+    {centers.map((cx) => <circle cx={cx} cy={BUS_Y} r="4.5" />)}
+    {centers.map((cx) => <circle cx={cx} cy={BRANCH_Y} r="4.5" />)}
+  </g>
 
   <!-- 根节点 -->
-  <g>
-    <rect x={ROOT_X} y={ROOT_Y} width={ROOT_W} height={ROOT_H} rx="12" fill={PRIMARY} />
-    <text x={W / 2} y={ROOT_Y + 36} text-anchor="middle" fill="#fff" font-size="25" font-weight="700">
-      {tree.root.title}
-    </text>
-    <text x={W / 2} y={ROOT_Y + 64} text-anchor="middle" fill="#dce7f5" font-size="14.5">
-      {tree.root.sub}
-    </text>
+  <g filter="url(#softShadow)">
+    <rect x={ROOT_X} y={ROOT_Y} width={ROOT_W} height={ROOT_H} rx="14" fill="url(#rootGrad)" />
   </g>
+  <text x={W / 2} y={ROOT_Y + 40} text-anchor="middle" fill="#fff" font-size="26" font-weight="700">
+    {tree.root.title}
+  </text>
+  <text x={W / 2} y={ROOT_Y + 68} text-anchor="middle" fill="#dbe7f6" font-size="15">
+    {tree.root.sub}
+  </text>
 
   <!-- 三个方向框 -->
   {
     tree.branches.map((b, i) => {
-      const dividerY = HEADER_H + b.sub.length * SUB_ITEM_H + DIVIDER_Y_OFF;
-      const labelY = dividerY + STUDENT_LABEL_OFF;
-      const firstLineY = labelY + STUDENT_LINE_H;
+      const col = b.color;
+      const dividerY = HEADER_H + b.sub.length * SUB_ITEM_H + DIVIDER_OFF;
+      const labelY = dividerY + LABEL_OFF;
+      const chipsTop = labelY + 12;
       return (
         <g transform={`translate(${xs[i]}, ${BRANCH_Y})`}>
-          <rect x="0" y="0" width={BW} height={heights[i]} rx="12" fill="#fff" stroke={PRIMARY} stroke-width="1.5" />
-          <path d={`M0 12 Q0 0 12 0 L${BW - 12} 0 Q${BW} 0 ${BW} 12 L${BW} ${HEADER_H} L0 ${HEADER_H} Z`} fill={SOFT} />
-          <text x="18" y="26" fill={PRIMARY} font-size="19" font-weight="700">{b.title}</text>
-          <text x="18" y="47" fill={MUTED} font-size="14">{b.count} 名成员</text>
+          <g filter="url(#lightShadow)">
+            <rect x="0" y="0" width={BW} height={heights[i]} rx="14" fill="#fff" stroke={col.main} stroke-width="1.5" />
+          </g>
+          <!-- 顶部色条 -->
+          <path d={`M0 14 Q0 0 14 0 L${BW - 14} 0 Q${BW} 0 ${BW} 14 L${BW} 6 L0 6 Z`} fill={col.main} />
+          <!-- 标题区 -->
+          <text x="20" y="34" fill={col.main} font-size="19" font-weight="700">{b.title}</text>
+          <text x="20" y="52" fill={MUTED} font-size="13.5">{b.count} 名成员</text>
 
+          <!-- 子方向 -->
           {b.sub.map((s, j) => (
-            <g transform={`translate(0, ${SUB_TOP - 14 + j * SUB_ITEM_H})`}>
-              <circle cx="22" cy="9" r="4" fill={PRIMARY} />
-              <text x="36" y="14" fill={DARK} font-size="15">{s}</text>
+            <g transform={`translate(0, ${FIRST_SUB_BASE - 5 + j * SUB_ITEM_H})`}>
+              <circle cx="24" cy="5" r="4" fill={col.main} />
+              <text x="38" y="10" fill={DARK} font-size="15">{s}</text>
             </g>
           ))}
 
-          <line x1="14" y1={dividerY} x2={BW - 14} y2={dividerY} stroke={LINE} stroke-width="1" />
-          <text x="18" y={labelY} fill={PRIMARY} font-size="13.5" font-weight="700">团队成员</text>
-          {b.studentLines.map((ln, k) => (
-            <text x="18" y={firstLineY + k * STUDENT_LINE_H} fill={DARK} font-size="13.5">{ln}</text>
+          <!-- 分隔线 -->
+          <line x1="16" y1={dividerY} x2={BW - 16} y2={dividerY} stroke={LINE} stroke-width="1" />
+          <!-- 团队成员 -->
+          <text x="18" y={labelY} fill={col.main} font-size="13.5" font-weight="700">团队成员</text>
+          {b.chips.map((c) => (
+            <g>
+              <rect x={c.x} y={chipsTop + c.y} width={c.w} height={CHIP_H} rx={CHIP_H / 2} fill={col.soft} stroke={col.main} stroke-width="1" stroke-opacity="0.45" />
+              <text x={c.x + c.w / 2} y={chipsTop + c.y + CHIP_H / 2 + 4.5} text-anchor="middle" fill={col.main} font-size={CHIP_FONT} font-weight="600">{c.label}</text>
+            </g>
           ))}
         </g>
       );
@@ -199,16 +248,22 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 26;
   }
 
   <!-- 应用场景行 -->
-  <text x={W / 2} y={SCEN_LABEL_Y} text-anchor="middle" fill={ACCENT} font-size="18" font-weight="700">应用场景</text>
+  <text x={W / 2} y={SCEN_LABEL_Y} text-anchor="middle" fill="#334155" font-size="18" font-weight="700">应用场景</text>
   {
-    tree.branches.map((b, i) => (
-      <g transform={`translate(${xs[i]}, ${SCEN_BOX_Y})`}>
-        <rect x="0" y="0" width={BW} height={SCEN_BOX_H} rx="12" fill={ACCENT_SOFT} stroke={ACCENT} stroke-width="1.5" />
-        {b.scenarioLines.map((ln, k) => (
-          <text x="18" y={22 + k * 22} fill={DARK} font-size="14">{ln}</text>
-        ))}
-      </g>
-    ))
+    tree.branches.map((b, i) => {
+      const col = b.color;
+      return (
+        <g transform={`translate(${xs[i]}, ${SCEN_BOX_Y})`}>
+          <g filter="url(#lightShadow)">
+            <rect x="0" y="0" width={BW} height={SCEN_BOX_H} rx="14" fill={col.soft2} stroke={col.main} stroke-width="1.5" />
+          </g>
+          <line x1="15" y1="16" x2="15" y2={SCEN_BOX_H - 16} stroke={col.main} stroke-width="3.5" stroke-linecap="round" />
+          {b.scenarioLines.map((ln, k) => (
+            <text x="28" y={24 + k * 23} fill={DARK} font-size="14">{ln}</text>
+          ))}
+        </g>
+      );
+    })
   }
 </svg>
 
@@ -216,8 +271,8 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 26;
   .dir-tree {
     width: 100%;
     height: auto;
-    max-width: 1000px;
-    margin: 8px auto 28px;
+    max-width: 1040px;
+    margin: 8px auto 8px;
     display: block;
   }
 </style>
