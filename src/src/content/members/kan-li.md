@@ -1,5 +1,5 @@
 ---
-name: 厉侃 (Kan Li / Li Kan)
+name: 厉侃 (Kan Li)
 role: 教授 / 博士生导师 / 课题组负责人
 is_pi: true
 email: kanli@hust.edu.cn
@@ -11,7 +11,7 @@ h_index: 29
 i10_index: 38
 google_scholar: https://scholar.google.com/citations?user=vWZDbKIAAAAJ&hl=en
 ---
-厉侃（Li Kan），男，1993 年 4 月出生，博士，研究员，博士生导师。
+厉侃（Kan Li），男，1993 年 4 月出生，博士，研究员，博士生导师。
 
 华中科技大学"华中学者"，国家自然科学基金优秀青年科学基金项目（海外）获得者，东湖青年学者。2014 年毕业于清华大学航空航天学院工程力学系（钱学森力学班），同年赴美国西北大学（Northwestern University）黄永刚院士课题组攻读博士学位，合作导师 John A. Rogers 院士，2019 年获理论与应用力学专业哲学博士学位。2019–2021 年在英国剑桥大学 Norman A. Fleck 院士课题组从事博士后研究。2021 年 12 月加入华中科技大学机械学院担任教授。
 
