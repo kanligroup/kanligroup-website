@@ -301,6 +301,10 @@ h2.section {
   background: var(--accent-soft);
   border-radius: 999px;
 }
+.tag--joint {
+  color: #b45309;
+  background: #fef3c7;
+}
 .card .project {
   font-size: 0.9rem;
   line-height: 1.5;

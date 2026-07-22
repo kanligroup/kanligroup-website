@@ -17,6 +17,7 @@ const members = defineCollection({
     role: z.string(),
     is_pi: z.boolean().optional(),
     alumni: z.boolean().optional(),
+    joint_training: z.boolean().optional(),
     degree: z.string().optional(),
     direction: z.string().optional(),
     project: z.string().optional(),

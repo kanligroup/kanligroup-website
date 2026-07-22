@@ -12,7 +12,11 @@ const { name, role, degree, direction, project, email, affiliation } = member.da
     <div class="m-avatar">{name.slice(0, 1)}</div>
     <div>
       <p class="m-name">{name}</p>
-      <p class="m-role"><span class="tag">{role}</span>{degree ? ' · ' + degree : ''}</p>
+      <p class="m-role">
+        <span class="tag">{role}</span>
+        {member.data.joint_training && <span class="tag tag--joint">联合培养</span>}
+        {degree ? ' · ' + degree : ''}
+      </p>
     </div>
   </div>
   {member.data.alumni ? (

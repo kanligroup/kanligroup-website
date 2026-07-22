@@ -3,6 +3,7 @@ name: "成文娜"
 role: "硕士研究生"
 degree: "2021级"
 alumni: true
+joint_training: true
 bio: "2021级硕士研究生（联合培养），已毕业。"
 ---
 
