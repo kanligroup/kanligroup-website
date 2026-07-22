@@ -16,6 +16,7 @@ const members = defineCollection({
     name: z.string(),
     role: z.string(),
     is_pi: z.boolean().optional(),
+    alumni: z.boolean().optional(),
     degree: z.string().optional(),
     direction: z.string().optional(),
     project: z.string().optional(),

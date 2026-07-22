@@ -5,13 +5,17 @@ import { getCollection } from 'astro:content';
 
 const all = await getCollection('members');
 const pi = all.filter((m) => m.data.is_pi);
-const phd = all
-  .filter((m) => m.data.role.includes('博士') && !m.data.is_pi)
+const current = all.filter((m) => !m.data.alumni && !m.data.is_pi);
+const phd = current
+  .filter((m) => m.data.role.includes('博士'))
   .sort((a, b) => (a.data.degree ?? '').localeCompare(b.data.degree ?? ''));
-const master = all
-  .filter((m) => m.data.role.includes('硕士') && !m.data.is_pi)
+const master = current
+  .filter((m) => m.data.role.includes('硕士'))
   .sort((a, b) => (a.data.degree ?? '').localeCompare(b.data.degree ?? ''));
 const students = [...phd, ...master];
+const alumni = all
+  .filter((m) => m.data.alumni)
+  .sort((a, b) => (a.data.degree ?? '').localeCompare(b.data.degree ?? ''));
 ---
 
 <BaseLayout title="团队成员 · Kan Li Group">
@@ -31,6 +35,15 @@ const students = [...phd, ...master];
       {master.map((m) => <MemberCard member={m} />)}
     </div>
 
-    <p class="muted">课题组由厉侃教授领衔，现有 {students.length} 名研究生（{phd.length} 名博士生 + {master.length} 名硕士生）。</p>
+    {alumni.length > 0 && (
+      <>
+        <h2 class="section">已毕业学生（{alumni.length}）</h2>
+        <div class="cards">
+          {alumni.map((m) => <MemberCard member={m} />)}
+        </div>
+      </>
+    )}
+
+    <p class="muted">课题组由厉侃教授领衔，现有 {students.length} 名在读研究生（{phd.length} 名博士生 + {master.length} 名硕士生），另有 {alumni.length} 名已毕业学生。</p>
   </section>
 </BaseLayout>

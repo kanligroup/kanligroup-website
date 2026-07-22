@@ -4,7 +4,7 @@ interface Props {
   member: CollectionEntry<'members'>;
 }
 const { member } = Astro.props;
-const { name, role, degree, direction, project, email } = member.data;
+const { name, role, degree, direction, project, email, affiliation } = member.data;
 ---
 
 <div class="card">
@@ -15,7 +15,11 @@ const { name, role, degree, direction, project, email } = member.data;
       <p class="m-role"><span class="tag">{role}</span>{degree ? ' · ' + degree : ''}</p>
     </div>
   </div>
-  {direction && <p>方向：{direction}</p>}
-  {project && <p class="project">负责：{project}</p>}
+  {member.data.alumni ? (
+    affiliation && <p class="project">毕业去向：{affiliation}</p>
+  ) : (
+    direction && <p>方向：{direction}</p>
+  )}
+  {!member.data.alumni && project && <p class="project">负责：{project}</p>}
   {email && <p class="muted">{email}</p>}
 </div>

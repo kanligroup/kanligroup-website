@@ -4,8 +4,8 @@ import { getCollection } from 'astro:content';
 
 const directions = (await getCollection('directions')).sort((a, b) => a.data.order - b.data.order);
 const members = await getCollection('members');
-const phdCount = members.filter((m) => m.data.role.includes('博士') && !m.data.is_pi).length;
-const masterCount = members.filter((m) => m.data.role.includes('硕士') && !m.data.is_pi).length;
+const phdCount = members.filter((m) => m.data.role.includes('博士') && !m.data.is_pi && !m.data.alumni).length;
+const masterCount = members.filter((m) => m.data.role.includes('硕士') && !m.data.is_pi && !m.data.alumni).length;
 const publications = await getCollection('publications');
 ---
 
