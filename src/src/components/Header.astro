@@ -38,7 +38,7 @@ const switchTo = switchHref(Astro, other);
           {t(item.key)}
         </a>
       ))}
-      <a class="lang-switch" href={switchTo} hreflang={other} aria-label={locale === 'en' ? 'Switch to Chinese' : '切换到英文'}>
+      <a class="lang-switch" href={switchTo} hreflang={other} aria-label={locale === 'en' ? 'Switch to Chinese' : '切换到英文'} onclick={`document.cookie='kl_lang=${other};path=/;max-age=31536000;samesite=lax'`}>
         <span class="lang-cur">{localeName[locale]}</span>
         <span class="lang-sep">/</span>
         <span class="lang-alt">{localeName[other]}</span>

@@ -20,6 +20,8 @@ const altPath = locale === 'en'
   : (path === '/' ? '/en/' : `/en${path}`);
 const canonical = new URL(path, Astro.site).href;
 const altHref = new URL(altPath, Astro.site).href;
+// x-default 指向英文版（其余地区默认英文）
+const enHref = locale === 'en' ? canonical : altHref;
 ---
 
 <!doctype html>
@@ -33,7 +35,60 @@ const altHref = new URL(altPath, Astro.site).href;
     <link rel="canonical" href={canonical} />
     <link rel="alternate" hreflang="zh-CN" href={locale === 'en' ? altHref : canonical} />
     <link rel="alternate" hreflang="en" href={locale === 'en' ? canonical : altHref} />
-    <link rel="alternate" hreflang="x-default" href={canonical} />
+    <link rel="alternate" hreflang="x-default" href={enHref} />
+    {/*
+      基于访客 IP 的语种自动选择（静态站只能客户端实现）：
+      中国大陆 → 中文（默认根路径，无跳转、无闪烁）；其他地区 → 重定向到 /en/ 同页。
+      优先级：1) 用户手动点击 中/EN 写入的 kl_lang（最高）；2) 已缓存的地理位置决策 kl_geo；3) 实时查询。
+    */}
+    <script is:inline>
+      (function () {
+        try {
+          var CHOICE = 'kl_lang', GEO = 'kl_geo';
+          var path = location.pathname;
+          var search = location.search || '';
+          var isEn = path.indexOf('/en/') === 0 || path === '/en';
+          function setC(n, v, d) {
+            document.cookie = n + '=' + encodeURIComponent(v) + ';path=/;max-age=' + (d * 86400) + ';samesite=lax';
+          }
+          function getC(n) {
+            var m = document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]+)'));
+            return m ? decodeURIComponent(m[1]) : null;
+          }
+          function toEn() {
+            var p = path === '/' ? '/' : path;
+            location.replace('/en' + p + search);
+          }
+          var choice = getC(CHOICE);
+          if (choice) {
+            if (choice === 'en' && !isEn) toEn();
+            else if (choice === 'zh' && isEn) location.replace((path.slice(3) || '/') + search);
+            return;
+          }
+          if (isEn) return; // 已在英文页，不回跳
+          var geo = getC(GEO);
+          if (geo) {
+            if (geo === 'en') toEn();
+            return;
+          }
+          // 首次访问：实时查询国家
+          var ctrl = new AbortController();
+          var tid = setTimeout(function () { ctrl.abort(); }, 1800);
+          fetch('https://ipapi.co/country/', { signal: ctrl.signal })
+            .then(function (r) { return r.text(); })
+            .then(function (cc) {
+              cc = (cc || '').trim().toUpperCase();
+              if (/^[A-Z]{2}$/.test(cc) && cc !== 'CN') {
+                setC(GEO, 'en', 365);
+                toEn();
+              } else {
+                setC(GEO, 'zh', 365); // 大陆或无法识别 → 中文
+              }
+            })
+            .catch(function () { /* 出错时保持中文，不缓存以便重试 */ });
+        } catch (e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" />
