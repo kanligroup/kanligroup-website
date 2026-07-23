@@ -17,7 +17,7 @@ const figures = [
     color: "#1a4d8f",
     soft: "#eaf1fa",
     media: [
-      { type: "image", src: "/gallery/img/nature-cover.png", alt: "Nature 封面 — 仿风传种子三维微电子飞行器", zhLabel: "Nature 封面 (2021)", enLabel: "Nature Cover (2021)", contain: true },
+      { type: "image", src: "/gallery/img/nature-cover.png", alt: "Nature 封面 — 仿风传种子三维微电子飞行器", enAlt: "Nature cover — bio-inspired 3D microelectronic microfliers", zhLabel: "Nature 封面 (2021)", enLabel: "Nature Cover (2021)", contain: true },
       { type: "video", src: "/gallery/vid/flight-demo.mp4", alt: "微飞行器下落飞行演示", zhAlt: "微飞行器下落飞行演示", enAlt: "Microflier descent demo", zhLabel: "微飞行器下落演示", enLabel: "Microflier descent" },
     ],
   },
@@ -44,7 +44,7 @@ const figures = [
 ];
 
 const titleOf = (f: typeof figures[number]) => isEn ? (dirEn[f.zhTitle] ?? f.zhTitle) : f.zhTitle;
-const captionOf = (f: typeof figures[number]) => isEn ? (dirCaptionEn[f.zhTitle] ?? '') : '';
+const captionOf = (f: typeof figures[number]) => isEn ? (dirCaptionEn[f.zhTitle] ?? f.caption) : f.caption;
 const altOf = (m: any) => isEn ? (m.enAlt ?? m.alt) : (m.zhAlt ?? m.alt);
 const labelOf = (m: any) => isEn ? (m.enLabel ?? m.label) : (m.zhLabel ?? m.label);
 const fallback = t('common.videoFallback');

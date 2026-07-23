@@ -3,6 +3,10 @@
 // 每个方向框内列出子方向、团队成员（彩色 pill）与代表论文（期刊名+年份）；
 // 底部「应用场景」一行对应三个方向。
 // 成员与论文均从 collection 动态计算，避免与页面其它处不一致。
+//
+// 注意：SVG <text> 不自动换行，英文子项/标题经常超出框宽。
+// 这里用 wrapLabel() 在构建期按可用宽度折行，并据实际行数动态计算纵向布局，
+// 确保中英文都不会溢出方向框。
 import { getCollection } from 'astro:content';
 import { getLocaleFromUrl } from '../i18n/utils';
 import { memberEn } from '../i18n/content';
@@ -66,6 +70,28 @@ const VENUE_SHORT: Record<string, string> = {
 const venueShort = (v: string) => VENUE_SHORT[v] ?? v;
 const pubLabel = (p: { data: { venue: string; year: number } }) =>
   `${venueShort(p.data.venue)} ${p.data.year}`;
+
+// ---- 文字折行工具 ----
+// SVG <text> 不会自动换行，这里在构建期按近似字宽折行，避免英文溢出框外。
+// CJK 字符较宽但通常单行即可放下（方向名/子项都较短），故 CJK 直接返回整行。
+function wrapLabel(text: string, maxW: number, fs: number): string[] {
+  if (/[一-鿿]/.test(text)) return [text];
+  const perChar = fs * 0.60; // 保守字宽估算（Sora 偏宽，留余量）
+  const words = String(text).split(' ');
+  const lines: string[] = [];
+  let cur = '';
+  for (const w of words) {
+    const trial = cur ? cur + ' ' + w : w;
+    if (cur && trial.length * perChar > maxW) {
+      lines.push(cur);
+      cur = w;
+    } else {
+      cur = trial;
+    }
+  }
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [text];
+}
 
 // 成员 pill 布局：贪心换行
 const CHIP_FONT = 14.5;
@@ -169,9 +195,9 @@ const treeEn = {
   root: { title: "Core Scientific Questions", sub: "Grounded in theoretical and applied mechanics · Distributed sensing on flexible substrates" },
   branches: [
     {
-      title: "Flexible Electronic Microflyers",
+      title: "Flexible Electronic Microfliers",
       sub: [
-        "Bio-inspired 3D microflyer structural design",
+        "Bio-inspired 3D microflier structural design",
         "Flight mechanics and active control",
         "Sensing–communication–actuation system integration",
         "Wireless networking and low-power video",
@@ -181,7 +207,7 @@ const treeEn = {
         points: [
           "Near-space distributed networking",
           "Planetary-exploration sensing front-ends",
-          "Environmental monitoring & pollutant capture",
+          "Environmental monitoring and pollutant capture",
         ],
       },
     },
@@ -190,17 +216,17 @@ const treeEn = {
       sub: [
         "Multi-parameter distributed sensing",
         "Pressure-array sensing",
-        "Nanoscale effects & in-situ sensing",
+        "Nanoscale effects and in-situ sensing",
         "Flexible PZT thin-film piezoelectric sensing",
         "Flexible multimodal sensing",
-        "Flexible skin / conformal surfaces",
+        "Flexible skin and conformal surfaces",
       ],
       scenario: {
         lead: "Extreme-environment structural monitoring",
         points: [
           "Aero-engine hot-section monitoring",
-          "Mercury / Jupiter extreme-environment exploration",
-          "Nuclear & industrial monitoring",
+          "Mercury and Jupiter extreme-environment exploration",
+          "Nuclear and industrial monitoring",
         ],
       },
     },
@@ -208,17 +234,17 @@ const treeEn = {
       title: "Flexible Intelligent Microsystems",
       sub: [
         "Triboelectric nanogenerator fibers",
-        "Flexible hybrid sensing & wireless localization",
-        "Modular flexible robots & soft actuation",
+        "Flexible hybrid sensing and wireless localization",
+        "Modular flexible robots and soft actuation",
         "Invasive brain–computer interfaces",
         "Rotor health monitoring (Y. Han)",
       ],
       scenario: {
         lead: "Human–machine–environment fusion terminals",
         points: [
-          "Wearable / implantable health monitoring",
+          "Wearable and implantable health monitoring",
           "Soft-robot sense–actuate integration",
-          "Neural interfaces & rehabilitation",
+          "Neural interfaces and rehabilitation",
         ],
       },
     },
@@ -227,12 +253,43 @@ const treeEn = {
 
 const tree = isEn ? treeEn : treeZh;
 
-// 补全每个分支：配色、成员 pill 布局、代表论文换行
-tree.branches.forEach((b, i) => {
-  const names = namesFor(b.title);
-  b.count = names.length;
-  b.color = palette[i];
+// 布局基础常量
+const W = 1120;
+const BW = 344;
+const GAP = (W - BW * 3) / 4;
+const ROOT_W = 580;
+const ROOT_X = (W - ROOT_W) / 2;
+const ROOT_Y = 28;
+const ROOT_H = 92;
+const BUS_Y = 168;
+const BRANCH_Y = 236;
+const BOTTOM_PAD = 16;
 
+// 文字区样式
+const TITLE_FS = 19;
+const TITLE_LH = 23;
+const COUNT_FS = 13;
+const SUB_FS = 14.5;
+const SUB_LH = 19;
+const SUB_GAP = 7;
+const PUB_FS = 14;
+const PUB_LH = 21;
+
+const SUB_MAX_W = BW - 38 - 16;   // 290
+const TITLE_MAX_W = BW - 40;       // 304
+
+const xs = tree.branches.map((_, i) => GAP + i * (BW + GAP));
+const centers = tree.branches.map((_, i) => xs[i] + BW / 2);
+
+// ---- 逐方向计算纵向布局（标题 → 成员数 → 子方向 → 团队成员 → 发表论文）----
+tree.branches.forEach((b, i) => {
+  const col = palette[i];
+  b.color = col;
+
+  const names = namesFor(treeZh.branches[i].title);
+  b.count = names.length;
+
+  // 成员 pill
   const chips: { x: number; y: number; w: number; label: string }[] = [];
   let cx = 18;
   let cy = 0;
@@ -250,62 +307,76 @@ tree.branches.forEach((b, i) => {
   b.chips = chips;
   b.chipRows = names.length ? maxY / (CHIP_H + CHIP_GAP_Y) + 1 : 0;
 
-  const items = pubsFor(b.title).map(pubLabel);
-  b.pubLines = wrapPubs(items);
-});
 
-// 布局常量
-const W = 1120;
-const BW = 344;
-const GAP = (W - BW * 3) / 4;
-const ROOT_W = 580;
-const ROOT_X = (W - ROOT_W) / 2;
-const ROOT_Y = 28;
-const ROOT_H = 92;
-const BUS_Y = 168;
-const BRANCH_Y = 236;
-const HEADER_H = 60;
-const SUB_ITEM_H = 30;
-const FIRST_SUB_BASE = HEADER_H + 25;   // 第一个子方向文字基线
-const DIVIDER_OFF = 10;
-const LABEL_OFF = 26;                    // 分区标签相对分隔线的偏移
-const BOTTOM_PAD = 16;
+  // 代表论文
+  const pubItems = pubsFor(treeZh.branches[i].title).map(pubLabel);
+  b.pubLines = wrapPubs(pubItems);
 
-const xs = tree.branches.map((_, i) => GAP + i * (BW + GAP));
-const centers = tree.branches.map((_, i) => xs[i] + BW / 2);
+  // 标题与子方向折行
+  b.titleLines = wrapLabel(b.title, TITLE_MAX_W, TITLE_FS);
+  b.subWrapped = b.sub.map((s) => wrapLabel(s, SUB_MAX_W, SUB_FS));
 
-// 逐段计算每个分支的纵向布局（子方向 → 团队成员 → 发表论文）
-const heights = tree.branches.map((b) => {
-  const dividerY = HEADER_H + b.sub.length * SUB_ITEM_H + DIVIDER_OFF;
-  const labelY = dividerY + LABEL_OFF;
-  const chipsTop = labelY + 12;
+  // 纵向游标
+  let y = 0;
+  b.titleY = 34;
+  y = b.titleY + b.titleLines.length * TITLE_LH;
+  b.countY = y + 2;
+  y = b.countY + 18;
+  b.subPositions = b.subWrapped.map((lines) => {
+    const pos = { y, lines };
+    y += lines.length * SUB_LH + SUB_GAP;
+    return pos;
+  });
+  const subBottom = y - SUB_GAP;
+  b.dividerY = subBottom + 12;
+  b.labelY = b.dividerY + 24;
+  const chipsTop = b.labelY + 12;
+  b.chipsTop = chipsTop;
+
+  // 预渲染成员 pill 为 SVG 字符串，用 set:html 注入，规避 Astro 编译器对
+  // “.map 返回含 <text> 动态子节点的 <g>”少输出一个括号的边界 bug。
+  b.chipsSvg = chips
+    .map(
+      (c) =>
+        `<g>` +
+        `<rect x="${c.x}" y="${b.chipsTop + c.y}" width="${c.w}" height="${CHIP_H}" rx="${CHIP_H / 2}" fill="${col.soft}" stroke="${col.main}" stroke-opacity="0.45" stroke-width="1"/>` +
+        `<text x="${c.x + c.w / 2}" y="${b.chipsTop + c.y + CHIP_H / 2 + 4.5}" text-anchor="middle" fill="${col.main}" font-size="${CHIP_FONT}" font-weight="600">${c.label}</text>` +
+        `</g>`
+    )
+    .join("");
+
   const chipsBottom = chipsTop + (b.chipRows > 0 ? b.chipRows * CHIP_H + (b.chipRows - 1) * CHIP_GAP_Y : 0);
   let bottom = chipsBottom;
-  const layout: any = { dividerY, labelY, chipsTop, chipsBottom };
   if (b.pubLines.length > 0) {
-    const pubsDividerY = chipsBottom + 16;
-    const pubsLabelY = pubsDividerY + LABEL_OFF;
-    const pubsTop = pubsLabelY + 22;
-    const pubsBottom = pubsTop + b.pubLines.length * PUB_LINE_H;
-    layout.pubsDividerY = pubsDividerY;
-    layout.pubsLabelY = pubsLabelY;
-    layout.pubsTop = pubsTop;
-    bottom = pubsBottom;
+    b.pubsDividerY = chipsBottom + 16;
+    b.pubsLabelY = b.pubsDividerY + 24;
+    b.pubsTop = b.pubsLabelY + 20;
+    bottom = b.pubsTop + b.pubLines.length * PUB_LH;
   }
-  b.layout = layout;
-  return bottom + BOTTOM_PAD;
+  b.bottom = bottom + BOTTOM_PAD;
 });
-const maxBranchH = Math.max(...heights);
 
-// 应用场景行
-const SCEN_LEAD_Y = 32;
-const SCEN_POINT_TOP = 52;
-const SCEN_POINT_H = 26;
+// ---- 应用场景行布局 ----
+const SCEN_LEAD_Y = 28;
+const SCEN_LEAD_LH = 20;
+const SCEN_POINT_LH = 21;
+const SCEN_POINT_GAP = 6;
+tree.branches.forEach((b) => {
+  b.scenLeadLines = wrapLabel(b.scenario.lead, BW - 40, 15.5);
+  let py = SCEN_LEAD_Y + b.scenLeadLines.length * SCEN_LEAD_LH + 8;
+  b.scenPointPos = b.scenario.points.map((p) => {
+    const lines = wrapLabel(p, BW - 42, 14);
+    const pos = { y: py, lines };
+    py += lines.length * SCEN_POINT_LH + SCEN_POINT_GAP;
+    return pos;
+  });
+  b.scenH = py + 10;
+});
+
+const maxBranchH = Math.max(...tree.branches.map((b) => b.bottom));
+const SCEN_BOX_H = Math.max(...tree.branches.map((b) => b.scenH));
 const SCEN_LABEL_Y = BRANCH_Y + maxBranchH + 44;
 const SCEN_BOX_Y = SCEN_LABEL_Y + 30;
-const maxPoints = Math.max(...tree.branches.map((b) => b.scenario.points.length));
-const SCEN_BOX_H = SCEN_POINT_TOP + maxPoints * SCEN_POINT_H + 14;
-
 const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
 ---
 
@@ -313,7 +384,7 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
   class="dir-tree"
   viewBox={`0 0 ${W} ${H}`}
   role="img"
-  aria-label="研究方向架构图"
+  aria-label={isEn ? 'Research architecture diagram' : '研究方向架构图'}
   xmlns="http://www.w3.org/2000/svg"
 >
   <defs>
@@ -329,24 +400,24 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
     </filter>
   </defs>
 
-  <!-- 背景面板 -->
+  <!-- background panel -->
   <rect x="0" y="0" width={W} height={H} rx="18" fill="#f7f9fc" stroke="#eaeef4" stroke-width="1" />
 
-  <!-- 连接线 -->
+  <!-- connectors -->
   <g stroke={LINE} stroke-width="2.5" fill="none" stroke-linecap="round">
     <line x1={W / 2} y1={ROOT_Y + ROOT_H} x2={W / 2} y2={BUS_Y} />
     <line x1={centers[0]} y1={BUS_Y} x2={centers[centers.length - 1]} y2={BUS_Y} />
     {centers.map((cx) => <line x1={cx} y1={BUS_Y} x2={cx} y2={BRANCH_Y} />)}
     {centers.map((cx) => <line x1={cx} y1={BRANCH_Y + maxBranchH} x2={cx} y2={SCEN_BOX_Y} />)}
   </g>
-  <!-- 连接节点圆点 -->
+  <!-- connector nodes -->
   <g fill={PRIMARY}>
     <circle cx={W / 2} cy={BUS_Y} r="4.5" />
     {centers.map((cx) => <circle cx={cx} cy={BUS_Y} r="4.5" />)}
     {centers.map((cx) => <circle cx={cx} cy={BRANCH_Y} r="4.5" />)}
   </g>
 
-  <!-- 根节点 -->
+  <!-- root node -->
   <g filter="url(#softShadow)">
     <rect x={ROOT_X} y={ROOT_Y} width={ROOT_W} height={ROOT_H} rx="14" fill="url(#rootGrad)" />
   </g>
@@ -357,47 +428,45 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
     {tree.root.sub}
   </text>
 
-  <!-- 三个方向框 -->
+  <!-- three direction boxes -->
   {
     tree.branches.map((b, i) => {
       const col = b.color;
-      const L = b.layout;
       return (
         <g transform={`translate(${xs[i]}, ${BRANCH_Y})`}>
           <g filter="url(#lightShadow)">
-            <rect x="0" y="0" width={BW} height={maxBranchH} rx="14" fill="#fff" stroke={col.main} stroke-width="1.5" />
+            <rect x="0" y="0" width={BW} height={b.bottom} rx="14" fill="#fff" stroke={col.main} stroke-width="1.5" />
           </g>
           {/* 顶部色条 */}
           <path d={`M0 14 Q0 0 14 0 L${BW - 14} 0 Q${BW} 0 ${BW} 14 L${BW} 6 L0 6 Z`} fill={col.main} />
           {/* 标题区 */}
-          <text x="20" y="36" fill={col.main} font-size="23" font-weight="700">{b.title}</text>
-          <text x="20" y="55" fill={MUTED} font-size="15.5">{b.count}{isEn ? ' members' : ' 名成员'}</text>
+          <text x="20" y={b.titleY} fill={col.main} font-size={TITLE_FS} font-weight="700">
+            {b.titleLines.map((ln, k) => <tspan x="20" y={b.titleY + k * TITLE_LH}>{ln}</tspan>)}
+          </text>
+          <text x="20" y={b.countY} fill={MUTED} font-size={COUNT_FS}>{b.count}{isEn ? ' members' : ' 名成员'}</text>
 
           {/* 子方向 */}
-          {b.sub.map((s, j) => (
-            <g transform={`translate(0, ${FIRST_SUB_BASE - 5 + j * SUB_ITEM_H})`}>
+          {b.subPositions.map((it) => (
+            <g transform={`translate(0, ${it.y})`}>
               <circle cx="24" cy="5" r="4.5" fill={col.main} />
-              <text x="38" y="11" fill={DARK} font-size="17.5">{s}</text>
+              <text x="38" y="11" fill={DARK} font-size={SUB_FS}>
+                {it.lines.map((ln, k) => <tspan x="38" y={11 + k * SUB_LH}>{ln}</tspan>)}
+              </text>
             </g>
           ))}
 
           {/* 团队成员 */}
-          <line x1="16" y1={L.dividerY} x2={BW - 16} y2={L.dividerY} stroke={LINE} stroke-width="1" />
-          <text x="18" y={L.labelY} fill={col.main} font-size="16" font-weight="700">{isEn ? 'Team' : '团队成员'}</text>
-          {b.chips.map((c) => (
-            <g>
-              <rect x={c.x} y={L.chipsTop + c.y} width={c.w} height={CHIP_H} rx={CHIP_H / 2} fill={col.soft} stroke={col.main} stroke-width="1" stroke-opacity="0.45" />
-              <text x={c.x + c.w / 2} y={L.chipsTop + c.y + CHIP_H / 2 + 4.5} text-anchor="middle" fill={col.main} font-size={CHIP_FONT} font-weight="600">{c.label}</text>
-            </g>
-          ))}
+          <line x1="16" y1={b.dividerY} x2={BW - 16} y2={b.dividerY} stroke={LINE} stroke-width="1" />
+          <text x="18" y={b.labelY} fill={col.main} font-size="16" font-weight="700">{isEn ? 'Team' : '团队成员'}</text>
+          <g class="chips" set:html={b.chipsSvg}></g>
 
           {/* 发表论文 */}
           {b.pubLines.length > 0 && (
             <g>
-              <line x1="16" y1={L.pubsDividerY} x2={BW - 16} y2={L.pubsDividerY} stroke={LINE} stroke-width="1" />
-              <text x="18" y={L.pubsLabelY} fill={col.main} font-size="16" font-weight="700">{isEn ? 'Publications' : '发表论文'}</text>
+              <line x1="16" y1={b.pubsDividerY} x2={BW - 16} y2={b.pubsDividerY} stroke={LINE} stroke-width="1" />
+              <text x="18" y={b.pubsLabelY} fill={col.main} font-size="16" font-weight="700">{isEn ? 'Publications' : '发表论文'}</text>
               {b.pubLines.map((line, k) => (
-                <text x="18" y={L.pubsTop + k * PUB_LINE_H} fill={DARK} font-size={PUB_FONT}>{line.join(PUB_SEP)}</text>
+                <text x="18" y={b.pubsTop + k * PUB_LH} fill={DARK} font-size={PUB_FONT}>{line.join(PUB_SEP)}</text>
               ))}
             </g>
           )}
@@ -417,11 +486,15 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
             <rect x="0" y="0" width={BW} height={SCEN_BOX_H} rx="14" fill={col.soft2} stroke={col.main} stroke-width="1.5" />
           </g>
           <line x1="15" y1="16" x2="15" y2={SCEN_BOX_H - 16} stroke={col.main} stroke-width="3.5" stroke-linecap="round" />
-          <text x="28" y={SCEN_LEAD_Y} fill={col.main} font-size="16.5" font-weight="700">{b.scenario.lead}</text>
-          {b.scenario.points.map((p, k) => (
-            <g transform={`translate(0, ${SCEN_POINT_TOP + k * SCEN_POINT_H})`}>
+          <text x="28" y={SCEN_LEAD_Y} fill={col.main} font-size="15.5" font-weight="700">
+            {b.scenLeadLines.map((ln, k) => <tspan x="28" y={SCEN_LEAD_Y + k * SCEN_LEAD_LH}>{ln}</tspan>)}
+          </text>
+          {b.scenPointPos.map((it) => (
+            <g transform={`translate(0, ${it.y})`}>
               <circle cx="32" cy="5" r="3.5" fill={col.main} />
-              <text x="42" y="11" fill={DARK} font-size="15">{p}</text>
+              <text x="42" y="11" fill={DARK} font-size="14">
+                {it.lines.map((ln, k) => <tspan x="42" y={11 + k * SCEN_POINT_LH}>{ln}</tspan>)}
+              </text>
             </g>
           ))}
         </g>

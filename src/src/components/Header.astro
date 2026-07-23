@@ -29,7 +29,7 @@ const switchTo = switchHref(Astro, other);
 <header class="site">
   <div class="container">
     <a class="logo" href={getRelativeLocaleUrl(locale, '/')}>
-      <img class="logo-mark" src="/logo.svg" alt="Kan Li Group 标志" width="30" height="30" />
+      <img class="logo-mark" src="/logo.svg" alt={locale === 'en' ? 'Kan Li Group logo' : 'Kan Li Group 标志'} width="30" height="30" />
       <span>Kan Li Group</span>
     </a>
     <nav>
@@ -38,7 +38,7 @@ const switchTo = switchHref(Astro, other);
           {t(item.key)}
         </a>
       ))}
-      <a class="lang-switch" href={switchTo} hreflang={other} aria-label={other === 'en' ? 'Switch to English' : '切换到中文'}>
+      <a class="lang-switch" href={switchTo} hreflang={other} aria-label={locale === 'en' ? 'Switch to Chinese' : '切换到英文'}>
         <span class="lang-cur">{localeName[locale]}</span>
         <span class="lang-sep">/</span>
         <span class="lang-alt">{localeName[other]}</span>

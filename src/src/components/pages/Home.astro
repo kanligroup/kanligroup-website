@@ -61,7 +61,7 @@ const fmtDate = (d: Date) =>
         <a class="btn btn-ghost" href={L('/about')}>{t('home.heroCta2')}</a>
       </div>
     </div>
-    <a class="scroll-cue" href="#research" aria-label="向下浏览"><span></span></a>
+    <a class="scroll-cue" href="#research" aria-label={locale === 'en' ? 'Scroll down' : '向下浏览'}><span></span></a>
   </section>
 
   <section class="block container" id="research">

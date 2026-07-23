@@ -4,13 +4,15 @@ import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 import { getLocaleFromUrl } from '../i18n/utils';
 
-const {
-  title = 'Kan Li Group',
-  description = '分布式微飞行器感知节点为 Physical AI 提供数据支撑',
-} = Astro.props;
+const { title = 'Kan Li Group' } = Astro.props;
 
 const locale = getLocaleFromUrl(Astro);
 const htmlLang = locale === 'en' ? 'en' : 'zh-CN';
+const defaultDesc =
+  locale === 'en'
+    ? 'Distributed microflier sensing nodes powering Physical AI'
+    : '分布式微飞行器感知节点为 Physical AI 提供数据支撑';
+const description = Astro.props.description ?? defaultDesc;
 const path = Astro.url.pathname;
 // 另一语言版本的同页 URL（用于 hreflang 与语言切换）
 const altPath = locale === 'en'

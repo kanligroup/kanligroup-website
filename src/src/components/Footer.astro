@@ -29,7 +29,7 @@ const brandSuffix = locale === 'en' ? '· Kan Li Group' : '· 厉侃课题组';
       </p>
       <p class="muted">{t('footer.tagline')}</p>
     </div>
-    <nav class="f-links" aria-label="页脚导航">
+    <nav class="f-links" aria-label={locale === 'en' ? 'Footer navigation' : '页脚导航'}>
       {links.map((l) => <a href={getRelativeLocaleUrl(locale, l.href)}>{t(l.key)}</a>)}
     </nav>
   </div>

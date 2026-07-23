@@ -173,7 +173,7 @@ const en: Dict = {
     about: 'About',
   },
   footer: {
-    tagline: 'Distributed microflyer sensing nodes powering Physical AI',
+    tagline: 'Distributed microflier sensing nodes powering Physical AI',
     copy: 'School of Mechanical Science and Engineering, HUST',
   },
   common: {
@@ -188,14 +188,14 @@ const en: Dict = {
   home: {
     eyebrow:
       'Huazhong University of Science and Technology · State Key Laboratory of Intelligent Manufacturing Equipment and Technology',
-    lede: 'Grounded in theoretical and applied mechanics, we develop distributed sensing on flexible substrates — focusing on flexible electronic microflyers, high-temperature flexible multimodal sensors, and flexible intelligent microsystems, providing the sensing infrastructure and data foundation for Physical AI.',
+    lede: 'Grounded in theoretical and applied mechanics, we develop distributed sensing on flexible substrates. We focus on flexible electronic microfliers, high-temperature flexible multimodal sensors, and flexible intelligent microsystems, and provide the sensing infrastructure and data foundation for Physical AI.',
     heroTitleCn: '· Kan Li Lab',
     heroCta1: 'Research Directions →',
     heroCta2: 'About the Lab',
     dirKicker: 'Research Directions',
     dirTitle: 'Research Directions',
     dirIntro:
-      'Grounded in theoretical and applied mechanics, we build distributed sensing on flexible substrates for Physical AI — three mutually reinforcing directions.',
+      'Grounded in theoretical and applied mechanics, we build distributed sensing on flexible substrates for Physical AI, across three mutually reinforcing directions.',
     teamLine: (n: number, p: number, m: number) =>
       `Led by Prof. Kan Li, the group currently has ${n} graduate students (${p} Ph.D. + ${m} Master students).`,
     teamLink: 'Meet the Team →',
@@ -217,9 +217,9 @@ const en: Dict = {
     kicker: 'Core Questions',
     title: 'Core Scientific Questions',
     lead:
-      'When the substrate is soft, curved, even tumbling through the air —<br />how do we let it still “sense” the world, and coordinate with its peers?',
+      'When the substrate is soft, curved, or tumbling through the air,<br />how do we let it still “sense” the world and coordinate with its peers?',
     framing:
-      'Flexible electronics is, at its heart, a mechanics problem: its electrical function depends on how the structure deforms and is precisely controlled under coupled mechanical, thermal, and electrical fields. Around the core question of <strong>“distributed sensing on flexible substrates,”</strong> we develop three mutually reinforcing capabilities that together form the sensing infrastructure for Physical AI —',
+      'Flexible electronics is, at its heart, a mechanics problem: its electrical function depends on how the structure deforms and is precisely controlled under coupled mechanical, thermal, and electrical fields. Around the core question of <strong>“distributed sensing on flexible substrates,”</strong> we develop three mutually reinforcing capabilities that together form the sensing infrastructure for Physical AI.',
     archKicker: 'Architecture',
     archTitle: 'Research Architecture',
     archCaption:
@@ -229,7 +229,7 @@ const en: Dict = {
     kicker: 'About',
     title: 'About the Lab',
     pi: 'Prof. Kan Li · Principal Investigator',
-    p1: 'The Kan Li Group is based at the School of Mechanical Science and Engineering, HUST, and the State Key Laboratory of Intelligent Manufacturing Equipment and Technology. Grounded in <strong>theoretical and applied mechanics</strong> and organized around the core question of <strong>distributed sensing on flexible substrates</strong>, we develop flexible electronic distributed-sensing technologies and use <strong>microflyers as distributed spatial sensing nodes</strong>, achieving a series of breakthroughs in bio-inspired microflyers, conformal high-temperature curved-surface sensing, crack-controlled sensors, and flexible intelligent microsystems.',
+    p1: 'The Kan Li Group is based at the School of Mechanical Science and Engineering, HUST, and the State Key Laboratory of Intelligent Manufacturing Equipment and Technology. Grounded in <strong>theoretical and applied mechanics</strong> and organized around the core question of <strong>distributed sensing on flexible substrates</strong>, we develop flexible electronic distributed-sensing technologies. We use <strong>microfliers as distributed spatial sensing nodes</strong>, and have achieved breakthroughs in bio-inspired microfliers, conformal high-temperature curved-surface sensing, crack-controlled sensors, and flexible intelligent microsystems.',
     metricsKicker: 'Scholar Metrics',
     metricsTitle: 'Scholar Metrics (Google Scholar, live data)',
     metricsNote: 'Data updated',
