@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { getLocaleFromUrl } from '../../i18n/utils';
+import { useTranslations } from '../../i18n/ui';
+import { mediaCatEn, mediaEn } from '../../i18n/content';
+
+const locale = getLocaleFromUrl(Astro);
+const t = useTranslations(locale);
+const isEn = locale === 'en';
+
+const media = (await getCollection('media')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const order = ['人物专访', '归国故事', '科研报道'];
+const catKey: Record<string, string> = {
+  '人物专访': 'interview',
+  '归国故事': 'returnee',
+  '科研报道': 'research',
+};
+const grouped = order
+  .map((cat) => ({ cat, items: media.filter((m) => m.data.category === cat) }))
+  .filter((g) => g.items.length > 0);
+
+const fmtDate = (d: Date) =>
+  `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+---
+
+<BaseLayout title={isEn ? 'Media · Kan Li Group' : '相关报道 · Kan Li Group'}>
+  <section class="block container">
+    <h2 class="section">{t('media.title')}</h2>
+    <p class="muted">{t('media.intro')}</p>
+
+    {grouped.map((g) => (
+      <div class="media-group">
+        <h3 class="media-group-title">{isEn ? (mediaCatEn[g.cat] ?? g.cat) : g.cat} <span class="media-count">{isEn ? `(${g.items.length})` : `（${g.items.length}）`}</span></h3>
+        <p class="muted media-group-desc">{t('media.catDesc.' + catKey[g.cat])}</p>
+        <ul class="news-list">
+          {g.items.map((m) => {
+            const en = mediaEn[m.slug];
+            const title = isEn && en?.title ? en.title : m.data.title;
+            const excerpt = isEn && en?.excerpt ? en.excerpt : m.data.excerpt;
+            const outlet = isEn && en?.outlet ? en.outlet : m.data.outlet;
+            return (
+            <li class="news-item">
+              <span class="news-date">{fmtDate(m.data.date)}</span>
+              <span class="media-outlet">{outlet}</span>
+              <div class="news-body">
+                <a class="news-title" href={m.data.url} target="_blank" rel="noopener">{title}</a>
+                {excerpt && <p class="news-excerpt">{excerpt}</p>}
+              </div>
+            </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))}
+  </section>
+</BaseLayout>

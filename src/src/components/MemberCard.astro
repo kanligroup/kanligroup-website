@@ -1,11 +1,26 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { getLocaleFromUrl } from '../i18n/utils';
+import { useTranslations } from '../i18n/ui';
+import { dirEn, memberEn } from '../i18n/content';
+
 interface Props {
   member: CollectionEntry<'members'>;
 }
 const { member } = Astro.props;
+const locale = getLocaleFromUrl(Astro);
+const t = useTranslations(locale);
+const isEn = locale === 'en';
+const en = memberEn[member.slug];
+
 const { name, role, degree, direction, project, email, affiliation } = member.data;
 const photo = member.data.avatar ?? `/people/${member.slug}.svg`;
+const displayName = isEn && en?.name ? en.name : name;
+const displayRole = isEn && en?.role ? en.role : role;
+const displayDegree = isEn && en?.degree ? en.degree : degree;
+const displayProject = isEn && en?.project ? en.project : project;
+const displayBio = isEn && en?.bio ? en.bio : member.data.bio;
+const displayAffiliation = isEn && en?.affiliation ? en.affiliation : affiliation;
 
 // 方向色映射（与全局三神圣色一致：蓝 / 青绿 / 紫）
 const dirColors: Record<string, string> = {
@@ -16,26 +31,28 @@ const dirColors: Record<string, string> = {
 const mc = member.data.is_pi
   ? "var(--primary)"
   : (direction ? (dirColors[direction] ?? "var(--primary)") : null);
+const dirLabel = direction ? (isEn ? (dirEn[direction] ?? direction) : direction) : null;
 ---
 
 <div class="card member-card" style={mc ? `--mc:${mc}` : undefined}>
   {mc && <span class="m-accent" aria-hidden="true"></span>}
   <div class="member-head">
-    <img class="m-photo" src={photo} alt={name} width="96" height="96" loading="lazy" />
+    <img class="m-photo" src={photo} alt={displayName} width="96" height="96" loading="lazy" />
     <div>
-      <p class="m-name">{name}</p>
+      <p class="m-name">{displayName}</p>
       <p class="m-role">
-        <span class="tag">{role}</span>
-        {member.data.joint_training && <span class="tag tag--joint">联合培养</span>}
-        {degree ? ' · ' + degree : ''}
+        <span class="tag">{displayRole}</span>
+        {member.data.joint_training && <span class="tag tag--joint">{t('common.joint')}</span>}
+        {displayDegree ? ' · ' + displayDegree : ''}
       </p>
     </div>
   </div>
   {member.data.alumni ? (
-    affiliation && <p class="project">毕业去向：{affiliation}</p>
+    affiliation && <p class="project">{t('common.nowAt')}{displayAffiliation}</p>
   ) : (
-    direction && <p class="m-dir" style={`color:${mc}`}>{direction}</p>
+    dirLabel && <p class="m-dir" style={`color:${mc}`}>{dirLabel}</p>
   )}
-  {!member.data.alumni && project && <p class="project">负责：{project}</p>}
+  {!member.data.alumni && displayProject && <p class="project">{t('common.focus')}{displayProject}</p>}
+  {displayBio && <p class="m-bio">{displayBio}</p>}
   {email && <p class="muted">{email}</p>}
 </div>

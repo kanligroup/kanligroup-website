@@ -4,6 +4,11 @@
 // 底部「应用场景」一行对应三个方向。
 // 成员与论文均从 collection 动态计算，避免与页面其它处不一致。
 import { getCollection } from 'astro:content';
+import { getLocaleFromUrl } from '../i18n/utils';
+import { memberEn } from '../i18n/content';
+
+const locale = getLocaleFromUrl(Astro);
+const isEn = locale === 'en';
 
 const PRIMARY = "#1a4d8f";
 const LINE = "#c2cedd";
@@ -20,11 +25,11 @@ const palette = [
 const members = await getCollection('members');
 const publications = await getCollection('publications');
 
-// 按方向取在读学生姓名（不含 PI）
+// 按方向取在读学生姓名（不含 PI）——英文版取罗马化姓名
 const namesFor = (title: string) =>
   members
     .filter((m) => m.data.direction === title && !m.data.is_pi)
-    .map((m) => m.data.name);
+    .map((m) => (isEn ? (memberEn[m.slug]?.name ?? m.data.name) : m.data.name));
 
 // 按方向取代表论文，按年份倒序
 const pubsFor = (title: string) =>
@@ -100,7 +105,7 @@ function wrapPubs(items: string[]): string[][] {
   return lines;
 }
 
-const tree = {
+const treeZh = {
   root: { title: "核心科学问题", sub: "以理论与应用力学为统摄 · 柔性载体上的分布式感知" },
   branches: [
     {
@@ -159,6 +164,68 @@ const tree = {
     },
   ],
 };
+
+const treeEn = {
+  root: { title: "Core Scientific Questions", sub: "Grounded in theoretical and applied mechanics · Distributed sensing on flexible substrates" },
+  branches: [
+    {
+      title: "Flexible Electronic Microflyers",
+      sub: [
+        "Bio-inspired 3D microflyer structural design",
+        "Flight mechanics and active control",
+        "Sensing–communication–actuation system integration",
+        "Wireless networking and low-power video",
+      ],
+      scenario: {
+        lead: "Air–ground cooperative sensing nodes",
+        points: [
+          "Near-space distributed networking",
+          "Planetary-exploration sensing front-ends",
+          "Environmental monitoring & pollutant capture",
+        ],
+      },
+    },
+    {
+      title: "High-Temperature Flexible Multimodal Sensors",
+      sub: [
+        "Multi-parameter distributed sensing",
+        "Pressure-array sensing",
+        "Nanoscale effects & in-situ sensing",
+        "Flexible PZT thin-film piezoelectric sensing",
+        "Flexible multimodal sensing",
+        "Flexible skin / conformal surfaces",
+      ],
+      scenario: {
+        lead: "Extreme-environment structural monitoring",
+        points: [
+          "Aero-engine hot-section monitoring",
+          "Mercury / Jupiter extreme-environment exploration",
+          "Nuclear & industrial monitoring",
+        ],
+      },
+    },
+    {
+      title: "Flexible Intelligent Microsystems",
+      sub: [
+        "Triboelectric nanogenerator fibers",
+        "Flexible hybrid sensing & wireless localization",
+        "Modular flexible robots & soft actuation",
+        "Invasive brain–computer interfaces",
+        "Rotor health monitoring (Y. Han)",
+      ],
+      scenario: {
+        lead: "Human–machine–environment fusion terminals",
+        points: [
+          "Wearable / implantable health monitoring",
+          "Soft-robot sense–actuate integration",
+          "Neural interfaces & rehabilitation",
+        ],
+      },
+    },
+  ],
+};
+
+const tree = isEn ? treeEn : treeZh;
 
 // 补全每个分支：配色、成员 pill 布局、代表论文换行
 tree.branches.forEach((b, i) => {
@@ -304,7 +371,7 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
           <path d={`M0 14 Q0 0 14 0 L${BW - 14} 0 Q${BW} 0 ${BW} 14 L${BW} 6 L0 6 Z`} fill={col.main} />
           {/* 标题区 */}
           <text x="20" y="36" fill={col.main} font-size="23" font-weight="700">{b.title}</text>
-          <text x="20" y="55" fill={MUTED} font-size="15.5">{b.count} 名成员</text>
+          <text x="20" y="55" fill={MUTED} font-size="15.5">{b.count}{isEn ? ' members' : ' 名成员'}</text>
 
           {/* 子方向 */}
           {b.sub.map((s, j) => (
@@ -316,7 +383,7 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
 
           {/* 团队成员 */}
           <line x1="16" y1={L.dividerY} x2={BW - 16} y2={L.dividerY} stroke={LINE} stroke-width="1" />
-          <text x="18" y={L.labelY} fill={col.main} font-size="16" font-weight="700">团队成员</text>
+          <text x="18" y={L.labelY} fill={col.main} font-size="16" font-weight="700">{isEn ? 'Team' : '团队成员'}</text>
           {b.chips.map((c) => (
             <g>
               <rect x={c.x} y={L.chipsTop + c.y} width={c.w} height={CHIP_H} rx={CHIP_H / 2} fill={col.soft} stroke={col.main} stroke-width="1" stroke-opacity="0.45" />
@@ -328,7 +395,7 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
           {b.pubLines.length > 0 && (
             <g>
               <line x1="16" y1={L.pubsDividerY} x2={BW - 16} y2={L.pubsDividerY} stroke={LINE} stroke-width="1" />
-              <text x="18" y={L.pubsLabelY} fill={col.main} font-size="16" font-weight="700">发表论文</text>
+              <text x="18" y={L.pubsLabelY} fill={col.main} font-size="16" font-weight="700">{isEn ? 'Publications' : '发表论文'}</text>
               {b.pubLines.map((line, k) => (
                 <text x="18" y={L.pubsTop + k * PUB_LINE_H} fill={DARK} font-size={PUB_FONT}>{line.join(PUB_SEP)}</text>
               ))}
@@ -340,7 +407,7 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
   }
 
   {/* 应用场景行 */}
-  <text x={W / 2} y={SCEN_LABEL_Y} text-anchor="middle" fill="#334155" font-size="21" font-weight="700">应用场景</text>
+  <text x={W / 2} y={SCEN_LABEL_Y} text-anchor="middle" fill="#334155" font-size="21" font-weight="700">{isEn ? 'Applications' : '应用场景'}</text>
   {
     tree.branches.map((b, i) => {
       const col = b.color;

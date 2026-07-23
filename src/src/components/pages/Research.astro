@@ -1,0 +1,175 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DirectionTree from '../../components/DirectionTree.astro';
+import { getLocaleFromUrl } from '../../i18n/utils';
+import { useTranslations } from '../../i18n/ui';
+import { dirEn, dirQKickerEn } from '../../i18n/content';
+
+const locale = getLocaleFromUrl(Astro);
+const t = useTranslations(locale);
+const isEn = locale === 'en';
+
+// 核心科学问题：三个方向的代表问题（中英文）
+const qCards = [
+  {
+    zhTitle: '柔性电子微飞行器',
+    qkZh: '分布式空间感知节点',
+    itemsZh: [
+      '如何设计、制备更轻、更小、飞得更久的微飞行器？',
+      '如何实现毫米、微米尺度微飞的主动控制？',
+    ],
+    itemsEn: [
+      'How to design and fabricate microfliers that are lighter, smaller, and stay airborne longer?',
+      'How to achieve active control of microfliers at millimeter and micrometer scales?',
+    ],
+  },
+  {
+    zhTitle: '耐高温柔性多模态传感器',
+    qkZh: '极端环境结构监测',
+    itemsZh: [
+      '如何在数百摄氏度高温下，依然稳定地感知压力、温度与应变？',
+      '如何让柔性薄膜传感器共形贴附于发动机曲面？',
+    ],
+    itemsEn: [
+      'How to stably sense pressure, temperature and strain at several hundred degrees Celsius?',
+      'How to make flexible thin-film sensors conformally attach to engine curved surfaces?',
+    ],
+  },
+  {
+    zhTitle: '柔性智能微系统',
+    qkZh: '人–机–环融合终端',
+    itemsZh: [
+      '如何把感知、通信、驱动压进纤维与软体，实现人–机–环融合？',
+      '如何让柔性电子从“能感知”走向“能思考、能行动”？',
+      '如何让一群微飞自组织，涌现出群体智能？',
+    ],
+    itemsEn: [
+      'How to pack sensing, communication and actuation into fibers and soft bodies for human–machine–environment fusion?',
+      'How to move flexible electronics from “can sense” to “can think and act”?',
+      'How can a swarm of microfliers self-organize and emerge with collective intelligence?',
+    ],
+  },
+];
+
+const colors = ['#1a4d8f', '#0f6e58', '#7c3aed'];
+const softs = ['#eaf1fa', '#e6f2ef', '#f1ebfd'];
+---
+
+<BaseLayout title={isEn ? 'Research · Kan Li Group' : '研究方向 · Kan Li Group'}>
+  <section class="block container">
+    <span class="kicker">{t('research.kicker')}</span>
+    <h2 class="section">{t('research.title')}</h2>
+    <div class="prose">
+      <p class="lead-question" set:html={t('research.lead')} />
+      <p class="framing" set:html={t('research.framing')} />
+    </div>
+
+    <div class="q-grid">
+      {qCards.map((c, i) => (
+        <article class="q-card reveal" style={`--qc:${colors[i]};--qc-soft:${softs[i]}`}>
+          <h3>{isEn ? dirEn[c.zhTitle] : c.zhTitle}</h3>
+          <p class="q-kicker">{isEn ? dirQKickerEn[c.zhTitle] : c.qkZh}</p>
+          <ul class="q-list">
+            {(isEn ? c.itemsEn : c.itemsZh).map((q) => (
+              <li class="q-item">{q}</li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="block container">
+    <span class="kicker">{t('research.archKicker')}</span>
+    <h2 class="section">{t('research.archTitle')}</h2>
+    <div class="tree-figure">
+      <DirectionTree />
+      <p class="tree-caption">{t('research.archCaption')}</p>
+    </div>
+  </section>
+
+  <style>
+    .framing {
+      max-width: 780px;
+      color: var(--text);
+      font-size: 15.5px;
+      line-height: 1.75;
+      margin: 0 0 4px;
+    }
+    .q-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin: 28px 0 6px;
+    }
+    .q-card {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+      padding: 22px 20px 20px;
+      overflow: hidden;
+      transition: transform .35s var(--ease-out-expo), box-shadow .35s var(--ease-out-expo), border-color .35s var(--ease-out-expo);
+    }
+    .q-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--qc);
+    }
+    .q-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: color-mix(in srgb, var(--qc) 35%, var(--line));
+    }
+    .q-card h3 {
+      margin: 0 0 3px;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--qc);
+      letter-spacing: -0.01em;
+    }
+    .q-kicker {
+      margin: 0 0 16px;
+      font-size: 12.5px;
+      color: var(--muted);
+      letter-spacing: 0.01em;
+    }
+    .q-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+    .q-item {
+      position: relative;
+      padding-left: 30px;
+      font-size: 14.5px;
+      line-height: 1.62;
+      color: var(--text);
+    }
+    .q-item::before {
+      content: "?";
+      position: absolute;
+      left: 0;
+      top: 1px;
+      width: 21px;
+      height: 21px;
+      border-radius: 50%;
+      background: var(--qc-soft);
+      color: var(--qc);
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    @media (max-width: 860px) {
+      .q-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</BaseLayout>

@@ -2,38 +2,52 @@
 // 标志性研究：三个方向的真实图片/视频素材，替代原示意性卡通插画。
 // 每个方向对应一组媒体（图片 / 视频），在首页研究方向区块以 2-up 网格呈现。
 // 素材文件保留在 public/gallery/ 下，未做删除。
+import { getLocaleFromUrl } from '../i18n/utils';
+import { useTranslations } from '../i18n/ui';
+import { dirEn, dirCaptionEn } from '../i18n/content';
+
+const locale = getLocaleFromUrl(Astro);
+const isEn = locale === 'en';
+const t = useTranslations(locale);
+
 const figures = [
   {
-    title: "柔性电子微飞行器",
+    zhTitle: "柔性电子微飞行器",
     caption: "受风传种子启发的三维微飞行器，可集成感知–通信–驱动，构建分布式空间感知节点（Nature 2021 封面）。",
     color: "#1a4d8f",
     soft: "#eaf1fa",
     media: [
-      { type: "image", src: "/gallery/img/nature-cover.png", alt: "Nature 封面 — 仿风传种子三维微电子飞行器", label: "Nature 封面 (2021)", contain: true },
-      { type: "video", src: "/gallery/vid/flight-demo.mp4", alt: "微飞行器下落飞行演示", label: "微飞行器下落演示" },
+      { type: "image", src: "/gallery/img/nature-cover.png", alt: "Nature 封面 — 仿风传种子三维微电子飞行器", zhLabel: "Nature 封面 (2021)", enLabel: "Nature Cover (2021)", contain: true },
+      { type: "video", src: "/gallery/vid/flight-demo.mp4", alt: "微飞行器下落飞行演示", zhAlt: "微飞行器下落飞行演示", enAlt: "Microflier descent demo", zhLabel: "微飞行器下落演示", enLabel: "Microflier descent" },
     ],
   },
   {
-    title: "耐高温柔性多模态传感器",
+    zhTitle: "耐高温柔性多模态传感器",
     caption: "共形于发动机热端与复杂曲面的柔性多模态传感，面向极端环境结构健康监测。",
     color: "#0f6e58",
     soft: "#e6f2ef",
     media: [
-      { type: "video", src: "/gallery/vid/ht-sensor-1.mp4", alt: "耐高温柔性传感器演示（一）", label: "耐高温传感器演示（一）" },
-      { type: "video", src: "/gallery/vid/ht-sensor-2.mp4", alt: "耐高温柔性传感器演示（二）", label: "耐高温传感器演示（二）" },
+      { type: "video", src: "/gallery/vid/ht-sensor-1.mp4", alt: "耐高温柔性传感器演示（一）", zhAlt: "耐高温柔性传感器演示（一）", enAlt: "High-temp flexible sensor demo (1)", zhLabel: "耐高温传感器演示（一）", enLabel: "High-Temp Sensor (1)" },
+      { type: "video", src: "/gallery/vid/ht-sensor-2.mp4", alt: "耐高温柔性传感器演示（二）", zhAlt: "耐高温柔性传感器演示（二）", enAlt: "High-temp flexible sensor demo (2)", zhLabel: "耐高温传感器演示（二）", enLabel: "High-Temp Sensor (2)" },
     ],
   },
   {
-    title: "柔性智能微系统",
+    zhTitle: "柔性智能微系统",
     caption: "纤维电子、软体驱动与神经接口融合的柔性智能微系统，实现人–机–环协同。",
     color: "#7c3aed",
     soft: "#f1ebfd",
     media: [
-      { type: "image", src: "/gallery/img/system-overview.png", alt: "系统集成架构全貌 — 感知–通信–驱动一体化", label: "系统集成 · 感知–通信–驱动", contain: true },
-      { type: "image", src: "/gallery/img/swarm-flight.png", alt: "微飞行器群体智能 — 分布式感知节点", label: "群体智能" },
+      { type: "image", src: "/gallery/img/system-overview.png", alt: "系统集成架构全貌 — 感知–通信–驱动一体化", zhAlt: "系统集成架构全貌 — 感知–通信–驱动一体化", enAlt: "System overview — sensing–communication–actuation", zhLabel: "系统集成 · 感知–通信–驱动", enLabel: "System · Sense–Comms–Actuate", contain: true },
+      { type: "image", src: "/gallery/img/swarm-flight.png", alt: "微飞行器群体智能 — 分布式感知节点", zhAlt: "微飞行器群体智能 — 分布式感知节点", enAlt: "Microflier swarm intelligence — distributed sensing nodes", zhLabel: "群体智能", enLabel: "Swarm Intelligence" },
     ],
   },
 ];
+
+const titleOf = (f: typeof figures[number]) => isEn ? (dirEn[f.zhTitle] ?? f.zhTitle) : f.zhTitle;
+const captionOf = (f: typeof figures[number]) => isEn ? (dirCaptionEn[f.zhTitle] ?? '') : '';
+const altOf = (m: any) => isEn ? (m.enAlt ?? m.alt) : (m.zhAlt ?? m.alt);
+const labelOf = (m: any) => isEn ? (m.enLabel ?? m.label) : (m.zhLabel ?? m.label);
+const fallback = t('common.videoFallback');
 ---
 
 <div class="fig-grid">
@@ -44,20 +58,20 @@ const figures = [
           {f.media.map((m) => (
             <div class="tile">
               {m.type === "video" ? (
-                <video class="tile-media" autoplay muted loop playsinline controls preload="metadata" aria-label={m.alt}>
+                <video class="tile-media" autoplay muted loop playsinline controls preload="metadata" aria-label={altOf(m)}>
                   <source src={m.src} type="video/mp4" />
-                  您的浏览器不支持视频播放。
+                  {fallback}
                 </video>
               ) : (
-                <img class={`tile-media${m.contain ? " tile-contain" : ""}`} src={m.src} alt={m.alt} loading="lazy" />
+                <img class={`tile-media${m.contain ? " tile-contain" : ""}`} src={m.src} alt={altOf(m)} loading="lazy" />
               )}
-              <span class="tile-cap">{m.label}</span>
+              <span class="tile-cap">{labelOf(m)}</span>
             </div>
           ))}
         </div>
         <figcaption class="fig-body">
-          <h3>{f.title}</h3>
-          <p>{f.caption}</p>
+          <h3>{titleOf(f)}</h3>
+          <p>{isEn ? captionOf(f) : f.caption}</p>
         </figcaption>
       </figure>
     ))

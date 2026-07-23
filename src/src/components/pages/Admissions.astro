@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getLocaleFromUrl } from '../../i18n/utils';
+import { useTranslations } from '../../i18n/ui';
+import { dirLabelEn } from '../../i18n/content';
+
+const locale = getLocaleFromUrl(Astro);
+const t = useTranslations(locale);
+const isEn = locale === 'en';
+
+// 招生/博士后方向（中→英）
+const dirs = [
+  { zh: '柔性电子微飞行器', en: 'Flexible Electronic Microflyers' },
+  { zh: '耐高温柔性多模态传感器', en: 'High-Temperature Flexible Multimodal Sensors' },
+  { zh: '柔性智能微系统', en: 'Flexible Intelligent Microsystems' },
+];
+const postDirs = [
+  { zh: '柔性电子微飞行器（分布式空间感知、感知–通信–驱动一体化）', en: 'Flexible electronic microflyers (distributed spatial sensing; sensing–communication–actuation integration)' },
+  { zh: '耐高温柔性多模态传感器（极端环境结构健康监测、复杂曲面共形感知）', en: 'High-temperature flexible multimodal sensors (extreme-environment structural-health monitoring; conformal sensing on complex curved surfaces)' },
+  { zh: '柔性智能微系统（柔性纤维电子、软体智能体、神经接口）', en: 'Flexible intelligent microsystems (flexible fiber electronics; soft intelligent agents; neural interfaces)' },
+];
+const dirName = (d: { zh: string; en: string }) => (isEn ? d.en : d.zh);
+---
+
+<BaseLayout title={isEn ? 'Admissions · Kan Li Group' : '招生招聘 · Kan Li Group'}>
+  <section class="block container">
+    <span class="kicker">{t('admissions.kicker')}</span>
+    <h2 class="section">{t('admissions.title')}</h2>
+    <div class="prose">
+      <p>{t('admissions.intro')}</p>
+      <ul>
+        {dirs.map((d) => <li>{dirName(d)}</li>)}
+      </ul>
+      <p>
+        <strong>{t('admissions.reqTitle')}</strong>{t('admissions.req')}
+      </p>
+      <p>
+        <strong>{t('admissions.contactTitle')}</strong>
+        <a href="mailto:kanli@hust.edu.cn">kanli@hust.edu.cn</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="block container">
+    <span class="kicker">{t('admissions.postKicker')}</span>
+    <h2 class="section">{t('admissions.postTitle')}</h2>
+    <div class="prose">
+      <p>{t('admissions.postIntro')}</p>
+      <p><strong>{t('admissions.postDir')}</strong></p>
+      <ul>
+        {postDirs.map((d) => <li>{dirName(d)}</li>)}
+      </ul>
+      <p><strong>{t('admissions.postCond')}</strong></p>
+      <ul>
+        <li>{t('admissions.postCond1')}</li>
+        <li>{t('admissions.postCond2')}</li>
+        <li>{t('admissions.postCond3')}</li>
+      </ul>
+      <p set:html={t('admissions.postBenefit')} />
+      <p>
+        <strong>{t('admissions.postApply')}</strong>{t('admissions.postApplyDetail')}
+        <a href="mailto:kanli@hust.edu.cn">kanli@hust.edu.cn</a>{t('admissions.postApplyNote')}
+      </p>
+    </div>
+  </section>
+</BaseLayout>

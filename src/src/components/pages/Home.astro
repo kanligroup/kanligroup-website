@@ -1,0 +1,148 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import SignatureFigures from '../../components/SignatureFigures.astro';
+import { getLocaleFromUrl } from '../../i18n/utils';
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import { useTranslations } from '../../i18n/ui';
+import { newsEn, mediaEn } from '../../i18n/content';
+
+const locale = getLocaleFromUrl(Astro);
+const t = useTranslations(locale);
+const isEn = locale === 'en';
+const L = (p: string) => getRelativeLocaleUrl(locale, p);
+
+const tagEn: Record<string, string> = {
+  '论文发表': 'Paper Published',
+  '综述': 'Review',
+  '传感': 'Sensing',
+  '学术任职': 'Academic Appointment',
+  '柔性结构': 'Flexible Structure',
+  '项目获批': 'Project Awarded',
+  '微飞行器': 'Microflier',
+  '学生荣誉': 'Student Honor',
+};
+
+const members = await getCollection('members');
+const phdCount = members.filter((m) => m.data.role.includes('博士') && !m.data.is_pi && !m.data.alumni).length;
+const masterCount = members.filter((m) => m.data.role.includes('硕士') && !m.data.is_pi && !m.data.alumni).length;
+const publications = await getCollection('publications');
+
+const recentPubs = publications
+  .filter((p) => p.data.year >= 2022)
+  .sort((a, b) => b.data.year - a.data.year)
+  .slice(0, 6);
+
+const news = (await getCollection('news'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 5);
+
+const allMedia = (await getCollection('media')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+const media = allMedia.filter(
+  (m) => m.data.outlet === '人民日报' || m.data.outlet === '清华大学'
+);
+
+const fmtDate = (d: Date) =>
+  `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}`;
+---
+
+<BaseLayout>
+  <section class="hero">
+    <div class="glow"></div>
+    <div class="hero-field" aria-hidden="true"></div>
+    <div class="container">
+      <span class="eyebrow">{t('home.eyebrow')}</span>
+      <h1>Kan Li Group <span class="hero-cn">{t('home.heroTitleCn')}</span></h1>
+      <p class="lede">{t('home.lede')}</p>
+      <div class="cta">
+        <a class="btn btn-primary" href={L('/research')}>{t('home.heroCta1')}</a>
+        <a class="btn btn-ghost" href={L('/about')}>{t('home.heroCta2')}</a>
+      </div>
+    </div>
+    <a class="scroll-cue" href="#research" aria-label="向下浏览"><span></span></a>
+  </section>
+
+  <section class="block container" id="research">
+    <span class="kicker">{t('home.dirKicker')}</span>
+    <h2 class="section">{t('home.dirTitle')}</h2>
+    <p class="muted">{t('home.dirIntro')}</p>
+    <SignatureFigures />
+    <p class="muted" style="margin-top:14px">
+      {t('home.teamLine')(phdCount + masterCount, phdCount, masterCount)}
+      <a href={L('/people')}>{t('home.teamLink')}</a>
+    </p>
+    <p class="muted" style="margin-top:8px">
+      <a href={L('/research')}>{t('home.archLink')}</a>
+    </p>
+  </section>
+
+  <section class="block container">
+    <span class="kicker">{t('home.pubKicker')}</span>
+    <h2 class="section">{t('home.pubTitle')}</h2>
+    <p class="muted">{t('home.pubIntro')}</p>
+    <ul class="pub-list">
+      {recentPubs.map((p) => (
+        <li class="pub-item">
+          <span class="pub-year">{p.data.year}</span>
+          <div class="pub-body">
+            <a class="pub-title" href={p.data.url || L('/publications')}>{p.data.title}</a>
+            <p class="pub-meta">{p.data.authors} · {p.data.venue}{p.data.volume ? ' ' + p.data.volume : ''}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+    <p class="muted"><a href={L('/publications')}>{t('home.pubLink')}</a></p>
+  </section>
+
+  <section class="block container">
+    <span class="kicker">{t('home.newsKicker')}</span>
+    <h2 class="section">{t('home.newsTitle')}</h2>
+    <p class="muted">{t('home.newsIntro')}</p>
+    <ul class="news-list">
+      {news.map((n) => {
+        const en = newsEn[n.slug];
+        const title = isEn && en?.title ? en.title : n.data.title;
+        const excerpt = isEn && en?.excerpt ? en.excerpt : n.data.excerpt;
+        const tag = isEn && n.data.tag ? (tagEn[n.data.tag] ?? n.data.tag) : n.data.tag;
+        return (
+        <li class="news-item">
+          <span class="news-date">{fmtDate(n.data.date)}</span>
+          {tag && <span class="news-tag">{tag}</span>}
+          <div class="news-body">
+            <a class="news-title" href={n.data.link || L('/news')}>{title}</a>
+            {excerpt && <p class="news-excerpt">{excerpt}</p>}
+          </div>
+        </li>
+        );
+      })}
+    </ul>
+    <p class="muted"><a href={L('/news')}>{t('home.newsLink')}</a></p>
+  </section>
+
+  <section class="block container">
+    <span class="kicker">{t('home.mediaKicker')}</span>
+    <h2 class="section">{t('home.mediaTitle')}</h2>
+    <p class="muted">{t('home.mediaIntro')}</p>
+    <ul class="news-list">
+      {media.map((m) => {
+        const en = mediaEn[m.slug];
+        const title = isEn && en?.title ? en.title : m.data.title;
+        const excerpt = isEn && en?.excerpt ? en.excerpt : m.data.excerpt;
+        const outlet = isEn && en?.outlet ? en.outlet : m.data.outlet;
+        return (
+        <li class="news-item">
+          <span class="news-date">{fmtDate(m.data.date)}</span>
+          <span class="media-outlet">{outlet}</span>
+          <div class="news-body">
+            <a class="news-title" href={m.data.url} target="_blank" rel="noopener">{title}</a>
+            {excerpt && <p class="news-excerpt">{excerpt}</p>}
+          </div>
+        </li>
+        );
+      })}
+    </ul>
+    <p class="muted"><a href={L('/media')}>{t('home.mediaLink')}</a></p>
+  </section>
+</BaseLayout>

@@ -1,29 +1,76 @@
 ---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import { useTranslations } from '../i18n/ui';
+import { switchHref, localeName, type Locale } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const other = locale === 'en' ? 'zh' : 'en';
+
 const nav = [
-  { href: '/', label: '首页' },
-  { href: '/research', label: '研究方向' },
-  { href: '/people', label: '团队成员' },
-  { href: '/publications', label: '研究成果' },
-  { href: '/news', label: '最新进展' },
-  { href: '/media', label: '相关报道' },
-  { href: '/admissions', label: '招生招聘' },
-  { href: '/about', label: '关于' },
+  { href: '/', key: 'nav.home' },
+  { href: '/research', key: 'nav.research' },
+  { href: '/people', key: 'nav.people' },
+  { href: '/publications', key: 'nav.publications' },
+  { href: '/news', key: 'nav.news' },
+  { href: '/media', key: 'nav.media' },
+  { href: '/admissions', key: 'nav.admissions' },
+  { href: '/about', key: 'nav.about' },
 ];
-const path = Astro.url.pathname;
+// 当前激活：去掉 /en 前缀后比较（首页特殊处理）
+const cur = Astro.url.pathname.replace(/^\/en/, '') || '/';
+const isActive = (href: string) => (href === '/' ? cur === '/' : cur === href || cur.startsWith(href + '/'));
+const switchTo = switchHref(Astro, other);
 ---
 
 <header class="site">
   <div class="container">
-    <a class="logo" href="/">
+    <a class="logo" href={getRelativeLocaleUrl(locale, '/')}>
       <img class="logo-mark" src="/logo.svg" alt="Kan Li Group 标志" width="30" height="30" />
       <span>Kan Li Group</span>
     </a>
     <nav>
       {nav.map((item) => (
-        <a href={item.href} aria-current={path === item.href ? 'page' : undefined}>
-          {item.label}
+        <a href={getRelativeLocaleUrl(locale, item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
+          {t(item.key)}
         </a>
       ))}
+      <a class="lang-switch" href={switchTo} hreflang={other} aria-label={other === 'en' ? 'Switch to English' : '切换到中文'}>
+        <span class="lang-cur">{localeName[locale]}</span>
+        <span class="lang-sep">/</span>
+        <span class="lang-alt">{localeName[other]}</span>
+      </a>
     </nav>
   </div>
 </header>
+
+<style>
+  .lang-switch {
+    margin-left: 6px;
+    padding: 4px 10px;
+    border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--line));
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .lang-switch:hover {
+    color: var(--primary);
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--line));
+    background: color-mix(in srgb, var(--primary) 6%, #fff);
+  }
+  .lang-cur { color: var(--primary); }
+  .lang-sep { opacity: .5; }
+  .lang-alt { opacity: .8; }
+  @media (max-width: 1080px) {
+    .lang-switch { margin-left: 0; }
+  }
+</style>

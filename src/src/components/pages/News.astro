@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { getLocaleFromUrl } from '../../i18n/utils';
+import { useTranslations } from '../../i18n/ui';
+import { newsEn } from '../../i18n/content';
+
+const locale = getLocaleFromUrl(Astro);
+const t = useTranslations(locale);
+const isEn = locale === 'en';
+
+const news = (await getCollection('news')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+const fmtDate = (d: Date) =>
+  `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+
+// 标签中→英（仅用于英文版）
+const tagEn: Record<string, string> = {
+  '论文发表': 'Paper Published',
+  '综述': 'Review',
+  '传感': 'Sensing',
+  '学术任职': 'Academic Appointment',
+  '柔性结构': 'Flexible Structure',
+  '项目获批': 'Project Awarded',
+  '微飞行器': 'Microflier',
+  '学生荣誉': 'Student Honor',
+};
+---
+
+<BaseLayout title={isEn ? 'News · Kan Li Group' : '最新进展 · Kan Li Group'}>
+  <section class="block container">
+    <h2 class="section">{t('news.title')}</h2>
+    <p class="muted">{t('news.intro')}</p>
+    <ul class="news-list">
+      {news.map((n) => {
+        const en = newsEn[n.slug];
+        const title = isEn && en?.title ? en.title : n.data.title;
+        const excerpt = isEn && en?.excerpt ? en.excerpt : n.data.excerpt;
+        const tag = isEn && n.data.tag ? (tagEn[n.data.tag] ?? n.data.tag) : n.data.tag;
+        return (
+          <li class="news-item">
+            <span class="news-date">{fmtDate(n.data.date)}</span>
+            {tag && <span class="news-tag">{tag}</span>}
+            <div class="news-body">
+              <a class="news-title" href={n.data.link || '#'}>{title}</a>
+              {excerpt && <p class="news-excerpt">{excerpt}</p>}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  </section>
+</BaseLayout>

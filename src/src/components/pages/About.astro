@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import scholar from '../../data/scholar.json';
+import { getLocaleFromUrl } from '../../i18n/utils';
+import { useTranslations } from '../../i18n/ui';
+
+const locale = getLocaleFromUrl(Astro);
+const t = useTranslations(locale);
+const isEn = locale === 'en';
+
+const fmtDate = (iso: string) => {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+const fetched = scholar.fetchedAt ? fmtDate(scholar.fetchedAt) : '—';
+const num = (n: number | null) => (n == null ? '—' : n.toLocaleString('en-US'));
+---
+
+<BaseLayout title={isEn ? 'About · Kan Li Group' : '关于 · Kan Li Group'}>
+  <section class="block container">
+    <span class="kicker">{t('about.kicker')}</span>
+    <div class="about-head">
+      <img class="pi-photo" src="/people/kan-li.jpg" alt="厉侃" width="120" height="120" />
+      <div>
+        <h2 class="section">{t('about.title')}</h2>
+        <p class="muted">{t('about.pi')}</p>
+      </div>
+    </div>
+    <div class="prose">
+      <p set:html={t('about.p1')} />
+
+      <span class="kicker">{t('about.metricsKicker')}</span>
+      <h3>{t('about.metricsTitle')}</h3>
+      <div class="stat-grid">
+        <div class="stat" style="--sc:var(--dir-blue)">
+          <span class="stat-num">{num(scholar.citations)}</span>
+          <span class="stat-label">{t('about.statCitations')}</span>
+        </div>
+        <div class="stat" style="--sc:var(--dir-teal)">
+          <span class="stat-num">{scholar.hIndex ?? '—'}</span>
+          <span class="stat-label">{t('about.statH')}</span>
+        </div>
+        <div class="stat" style="--sc:var(--dir-purple)">
+          <span class="stat-num">{scholar.i10 ?? '—'}</span>
+          <span class="stat-label">{t('about.statI10')}</span>
+        </div>
+      </div>
+      <p class="scholar-note">
+        {t('about.metricsNote')} {fetched} · {scholar.live ? t('about.metricsNoteLive') : t('about.metricsNoteCache')} ·
+        <a href={scholar.source} target="_blank" rel="noopener">{t('about.metricsView')}</a>
+      </p>
+      <p class="muted" style="margin-top:10px" set:html={t('about.metricsLine')(num(scholar.citationsSince))} />
+
+      <h3>{t('about.honorsTitle')}</h3>
+      <ol>
+        {t('honors').map((h: string) => <li>{h}</li>)}
+      </ol>
+
+      <h3>{t('about.mentorsTitle')}</h3>
+      <ul>
+        {t('mentors').map((m: { name: string; desc: string }) => (
+          <li><strong>{m.name}</strong> — {m.desc}</li>
+        ))}
+      </ul>
+
+      <p>
+        <strong>{t('about.contactTitle')}</strong>
+        <a href="mailto:kanli@hust.edu.cn">kanli@hust.edu.cn</a> &nbsp;·&nbsp;
+        {t('about.contact')}
+      </p>
+    </div>
+
+    <figure class="group-photo">
+      <img src="/group-photo-2026.jpg" alt={t('about.groupPhotoCap')} loading="lazy" />
+      <figcaption>
+        {t('about.groupPhotoCap')}
+        <span class="roster">{t('about.roster')}</span>
+      </figcaption>
+    </figure>
+  </section>
+</BaseLayout>

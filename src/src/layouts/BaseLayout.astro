@@ -2,21 +2,36 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
+import { getLocaleFromUrl } from '../i18n/utils';
 
 const {
   title = 'Kan Li Group',
   description = '分布式微飞行器感知节点为 Physical AI 提供数据支撑',
 } = Astro.props;
+
+const locale = getLocaleFromUrl(Astro);
+const htmlLang = locale === 'en' ? 'en' : 'zh-CN';
+const path = Astro.url.pathname;
+// 另一语言版本的同页 URL（用于 hreflang 与语言切换）
+const altPath = locale === 'en'
+  ? (path === '/en/' ? '/' : path.replace(/^\/en/, '') || '/')
+  : (path === '/' ? '/en/' : `/en${path}`);
+const canonical = new URL(path, Astro.site).href;
+const altHref = new URL(altPath, Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang={htmlLang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="zh-CN" href={locale === 'en' ? altHref : canonical} />
+    <link rel="alternate" hreflang="en" href={locale === 'en' ? canonical : altHref} />
+    <link rel="alternate" hreflang="x-default" href={canonical} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" />
@@ -42,10 +57,10 @@ const {
     </script>
   </head>
   <body>
-    <Header />
+    <Header locale={locale} />
     <main>
       <slot />
     </main>
-    <Footer />
+    <Footer locale={locale} />
   </body>
 </html>

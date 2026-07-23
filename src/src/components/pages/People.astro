@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MemberCard from '../../components/MemberCard.astro';
+import { getCollection } from 'astro:content';
+import { getLocaleFromUrl } from '../../i18n/utils';
+import { useTranslations } from '../../i18n/ui';
+
+const locale = getLocaleFromUrl(Astro);
+const t = useTranslations(locale);
+
+const all = await getCollection('members');
+const pi = all.filter((m) => m.data.is_pi);
+const current = all.filter((m) => !m.data.alumni && !m.data.is_pi);
+const phd = current
+  .filter((m) => m.data.role.includes('博士'))
+  .sort((a, b) => (a.data.degree ?? '').localeCompare(b.data.degree ?? ''));
+const master = current
+  .filter((m) => m.data.role.includes('硕士'))
+  .sort((a, b) => (a.data.degree ?? '').localeCompare(b.data.degree ?? ''));
+const students = [...phd, ...master];
+const alumni = all
+  .filter((m) => m.data.alumni)
+  .sort((a, b) => (a.data.degree ?? '').localeCompare(b.data.degree ?? ''));
+---
+
+<BaseLayout title={locale === 'en' ? 'Team · Kan Li Group' : '团队成员 · Kan Li Group'}>
+  <section class="block container">
+    <h2 class="section">{t('people.pi')}</h2>
+    <div class="cards">
+      {pi.map((m) => <MemberCard member={m} />)}
+    </div>
+
+    <h2 class="section">{t('people.phd')(phd.length)}</h2>
+    <div class="cards">
+      {phd.map((m) => <MemberCard member={m} />)}
+    </div>
+
+    <h2 class="section">{t('people.master')(master.length)}</h2>
+    <div class="cards">
+      {master.map((m) => <MemberCard member={m} />)}
+    </div>
+
+    {alumni.length > 0 && (
+      <>
+        <h2 class="section">{t('people.alumni')(alumni.length)}</h2>
+        <div class="cards">
+          {alumni.map((m) => <MemberCard member={m} />)}
+        </div>
+      </>
+    )}
+
+    <p class="muted">{t('people.bottom')(students.length, phd.length, master.length, alumni.length)}</p>
+  </section>
+</BaseLayout>
