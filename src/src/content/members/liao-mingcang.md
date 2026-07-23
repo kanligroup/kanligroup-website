@@ -1,5 +1,6 @@
 ---
 name: "廖酩苍"
+avatar: /people/liao-mingcang.jpg
 role: "硕士研究生"
 degree: "2025级"
 direction: "柔性电子微飞行器"

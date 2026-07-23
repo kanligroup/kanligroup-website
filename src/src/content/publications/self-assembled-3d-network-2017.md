@@ -6,6 +6,7 @@ year: 2017
 doi: "10.1038/ncomms15894"
 highlight: true
 tags: [soft-electronics, 3D-network]
+direction: "柔性电子微飞行器"
 ---
 
 Self-assembled three dimensional network designs for soft electronics.

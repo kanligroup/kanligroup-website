@@ -1,5 +1,6 @@
 ---
 name: "耿秀侠"
+avatar: /people/geng-xiuxia.jpg
 role: "博士研究生"
 degree: "2025级"
 direction: "柔性电子微飞行器"

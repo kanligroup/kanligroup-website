@@ -5,6 +5,7 @@ venue: "Nano Energy"
 year: 2021
 doi: "10.1016/j.nanoen.2021.106550"
 tags: [sensing-skin, micro-flyer]
+direction: "柔性电子微飞行器"
 ---
 
 Bio-inspired, intelligent flexible sensing skin for multifunctional flying perception.

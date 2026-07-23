@@ -5,6 +5,7 @@ venue: "Science Advances"
 year: 2021
 doi: "10.1126/sciadv.abf9153"
 tags: [neural, 3D-assembly]
+direction: "柔性智能微系统"
 ---
 
 Three-dimensional, multifunctional neural interfaces for cortical spheroids and engineered assembloids.

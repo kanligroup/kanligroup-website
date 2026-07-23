@@ -1,5 +1,6 @@
 ---
 name: "袁理"
+avatar: /people/yuan-li.jpg
 role: "硕士研究生"
 degree: "2023级"
 alumni: true

@@ -6,6 +6,7 @@ year: 2020
 doi: "10.1038/s41551-020-00604-w"
 highlight: true
 tags: [catheter, soft-electronics]
+direction: "柔性智能微系统"
 ---
 
 Catheter-integrated soft multilayer electronic arrays for multiplexed sensing and actuation during cardiac surgery.

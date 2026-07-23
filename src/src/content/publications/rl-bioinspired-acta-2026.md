@@ -6,6 +6,7 @@ year: 2026
 volume: "52 (5), 953-965"
 doi: "10.16383/j.aas.c250508"
 tags: [soft-robot, control, artificial-muscle]
+direction: "柔性智能微系统"
 ---
 
 Reinforcement learning control for bioinspired robots driven by redundant artificial muscles.

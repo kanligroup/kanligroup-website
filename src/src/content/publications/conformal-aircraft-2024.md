@@ -5,6 +5,7 @@ venue: "International Journal of Mechanical Sciences"
 year: 2024
 doi: "10.1016/j.ijmecsci.2024.109448"
 tags: [conformal, aircraft]
+direction: "耐高温柔性多模态传感器"
 ---
 
 Design criteria for conformal integration of flexible electronics on advanced aircraft surfaces.

@@ -5,6 +5,7 @@ venue: "NPJ Digital Medicine"
 year: 2018
 doi: "10.1038/s41746-017-0009-x"
 tags: [biosensor, wearable]
+direction: "柔性智能微系统"
 ---
 
 Highly flexible, wearable, and disposable cardiac biosensors for remote and ambulatory monitoring.

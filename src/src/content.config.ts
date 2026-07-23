@@ -48,6 +48,7 @@ const publications = defineCollection({
     citations: z.number().optional(),
     highlight: z.boolean().optional(),
     cover: z.boolean().optional(),
+    direction: z.string().optional(),
     tags: z.array(z.string()).optional(),
   }),
 });
@@ -63,4 +64,16 @@ const news = defineCollection({
   }),
 });
 
-export const collections = { directions, members, publications, news };
+const media = defineCollection({
+  type: 'content',
+  schema: z.object({
+    date: z.coerce.date(),
+    outlet: z.string(),
+    category: z.enum(['人物专访', '归国故事', '科研报道']).default('归国故事'),
+    title: z.string(),
+    url: z.string(),
+    excerpt: z.string().optional(),
+  }),
+});
+
+export const collections = { directions, members, publications, news, media };

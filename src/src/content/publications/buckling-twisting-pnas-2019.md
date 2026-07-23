@@ -6,6 +6,7 @@ year: 2019
 doi: "10.1073/pnas.1901193116"
 highlight: true
 tags: [3D-assembly, buckling]
+direction: "柔性电子微飞行器"
 ---
 
 Buckling and twisting of advanced materials into morphable 3D mesostructures.

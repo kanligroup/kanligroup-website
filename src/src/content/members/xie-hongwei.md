@@ -1,5 +1,6 @@
 ---
 name: "谢宏伟"
+avatar: /people/xie-hongwei.jpg
 role: "博士研究生"
 degree: "2026级"
 direction: "柔性电子微飞行器"

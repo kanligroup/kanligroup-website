@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Kan Li Group 标志">
+  <defs>
+    <!-- 单枚勾玉：圆头 + 向中心收拢的尾，置于“正上方”基准位 -->
+    <g id="tomoe">
+      <circle cx="24" cy="11" r="5"/>
+      <path d="M24,11 C18.5,12.5 19,19.5 24,22.5 C29,19.5 29.5,12.5 24,11 Z"/>
+    </g>
+  </defs>
+
+  <!-- 虹膜外环 + 内侧导引环 -->
+  <g fill="none" stroke="#ffffff" stroke-width="1.5">
+    <circle cx="24" cy="24" r="22"/>
+    <circle cx="24" cy="24" r="15.5" stroke-opacity="0.32"/>
+  </g>
+
+  <!-- 三枚勾玉：120° 旋转对称，分别对应三个研究方向配色 -->
+  <use href="#tomoe" fill="#3b82f6" transform="rotate(0 24 24)"/>
+  <use href="#tomoe" fill="#14b8a6" transform="rotate(120 24 24)"/>
+  <use href="#tomoe" fill="#8b5cf6" transform="rotate(240 24 24)"/>
+
+  <!-- 中心感知枢纽（瞳孔） -->
+  <circle cx="24" cy="24" r="4.5" fill="#ffffff"/>
+</svg>

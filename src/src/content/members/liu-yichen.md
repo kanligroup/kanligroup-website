@@ -1,5 +1,6 @@
 ---
 name: "刘奕辰"
+avatar: /people/liu-yichen.jpg
 role: "博士研究生"
 degree: "2024级"
 direction: "柔性电子微飞行器"

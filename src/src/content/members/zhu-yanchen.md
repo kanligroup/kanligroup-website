@@ -1,5 +1,6 @@
 ---
 name: "朱彦臣"
+avatar: /people/zhu-yanchen.jpg
 role: "博士研究生"
 degree: "2025级"
 direction: "柔性智能微系统"

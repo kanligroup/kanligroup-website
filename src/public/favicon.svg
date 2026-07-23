@@ -1,4 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#1a4d8f"/>
-  <text x="32" y="44" font-size="34" fill="#ffffff" text-anchor="middle" font-family="sans-serif" font-weight="700">K</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kan Li Group">
+  <defs>
+    <g id="tomoe64">
+      <circle cx="32" cy="14.5" r="6.7"/>
+      <path d="M32,14.5 C25,16.5 25.5,26 32,30.5 C38.5,26 39,16.5 32,14.5 Z"/>
+    </g>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#11203a"/>
+  <g fill="none" stroke="#ffffff" stroke-width="2.2">
+    <circle cx="32" cy="32" r="29"/>
+    <circle cx="32" cy="32" r="20.5" stroke-opacity="0.32"/>
+  </g>
+  <use href="#tomoe64" fill="#3b82f6" transform="rotate(0 32 32)"/>
+  <use href="#tomoe64" fill="#14b8a6" transform="rotate(120 32 32)"/>
+  <use href="#tomoe64" fill="#8b5cf6" transform="rotate(240 32 32)"/>
+  <circle cx="32" cy="32" r="6" fill="#ffffff"/>
 </svg>

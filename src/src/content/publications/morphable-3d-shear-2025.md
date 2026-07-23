@@ -5,6 +5,7 @@ venue: "Materials Today"
 year: 2025
 url: "https://papers.ssrn.com/sol3/Delivery.cfm?abstractid=5033233"
 tags: [3D-assembly]
+direction: "柔性电子微飞行器"
 ---
 
 Morphable 3D Architectures Enabled by Shear-Guided Approach.

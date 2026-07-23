@@ -1,5 +1,6 @@
 ---
 name: "肖龙海"
+avatar: /people/xiao-longhai.jpg
 role: "硕士研究生"
 degree: "2025级"
 direction: "柔性智能微系统"

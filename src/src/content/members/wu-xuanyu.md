@@ -1,5 +1,6 @@
 ---
 name: "吴萱雨"
+avatar: /people/wu-xuanyu.jpg
 role: "博士研究生"
 degree: "2023级"
 direction: "柔性电子微飞行器"

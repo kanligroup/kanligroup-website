@@ -1,5 +1,6 @@
 ---
 name: "侯超"
+avatar: /people/hou-chao.jpg
 role: "博士研究生"
 degree: "2018级"
 joint_training: true

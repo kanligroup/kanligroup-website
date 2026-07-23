@@ -3,7 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import SignatureFigures from '../components/SignatureFigures.astro';
 
-const directions = (await getCollection('directions')).sort((a, b) => a.data.order - b.data.order);
 const members = await getCollection('members');
 const phdCount = members.filter((m) => m.data.role.includes('博士') && !m.data.is_pi && !m.data.alumni).length;
 const masterCount = members.filter((m) => m.data.role.includes('硕士') && !m.data.is_pi && !m.data.alumni).length;
@@ -20,49 +19,50 @@ const news = (await getCollection('news'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 5);
 
+// 相关报道：首页仅展示人民日报、清华大学两家权威媒体的报道
+const allMedia = (await getCollection('media')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+const media = allMedia.filter(
+  (m) => m.data.outlet === '人民日报' || m.data.outlet === '清华大学'
+);
+
 const fmtDate = (d: Date) =>
   `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}`;
 ---
 
 <BaseLayout>
   <section class="hero">
+    <div class="glow"></div>
+    <div class="hero-field" aria-hidden="true"></div>
     <div class="container">
       <span class="eyebrow">华中科技大学 · 智能制造装备与技术全国重点实验室</span>
-      <h1>Kan Li Group · 厉侃课题组</h1>
+      <h1>Kan Li Group <span class="hero-cn">· 厉侃课题组</span></h1>
       <p class="lede">以理论与应用力学为统摄，发展柔性载体上的分布式感知——聚焦柔性电子微飞行器、耐高温柔性多模态传感器与柔性智能微系统，为 Physical AI 提供感知基础设施与数据支撑。</p>
       <div class="cta">
         <a class="btn btn-primary" href="/research">查看研究方向 →</a>
         <a class="btn btn-ghost" href="/about">关于课题组</a>
       </div>
     </div>
+    <a class="scroll-cue" href="#research" aria-label="向下浏览"><span></span></a>
   </section>
 
-  <section class="block container">
-    <h2 class="section">标志性研究</h2>
-    <p class="muted">面向 Physical AI 的柔性载体分布式感知——三个相互支撑的研究方向。</p>
+  <section class="block container" id="research">
+    <span class="kicker">Research Directions</span>
+    <h2 class="section">研究方向</h2>
+    <p class="muted">以理论与应用力学为统摄，面向 Physical AI 的柔性载体分布式感知——三个相互支撑的研究方向。</p>
     <SignatureFigures />
     <p class="muted" style="margin-top:14px">
       课题组由厉侃教授领衔，现有 {phdCount + masterCount} 名研究生（{phdCount} 名博士生 + {masterCount} 名硕士生）。
       <a href="/people">查看团队 →</a>
     </p>
-  </section>
-
-  <section class="block container">
-    <h2 class="section">研究方向</h2>
-    <div class="cards">
-      {directions.map((d) => (
-        <div class="card card--direction">
-          <h3>{d.data.title}</h3>
-          <p class="dir-summary">{d.data.lead}</p>
-        </div>
-      ))}
-    </div>
-    <p class="muted">
+    <p class="muted" style="margin-top:8px">
       <a href="/research">查看完整研究方向架构 →</a>
     </p>
   </section>
 
   <section class="block container">
+    <span class="kicker">Selected Publications</span>
     <h2 class="section">近期成果</h2>
     <p class="muted">近几年有代表性的工作（按发表年份倒序）。</p>
     <ul class="pub-list">
@@ -80,6 +80,7 @@ const fmtDate = (d: Date) =>
   </section>
 
   <section class="block container">
+    <span class="kicker">News &amp; Updates</span>
     <h2 class="section">最新进展</h2>
     <p class="muted">课题组前沿要闻与研究动态。</p>
     <ul class="news-list">
@@ -95,5 +96,24 @@ const fmtDate = (d: Date) =>
       ))}
     </ul>
     <p class="muted"><a href="/news">查看全部进展 →</a></p>
+  </section>
+
+  <section class="block container">
+    <span class="kicker">In the Media</span>
+    <h2 class="section">相关报道</h2>
+    <p class="muted">主流媒体对厉侃教授及课题组研究的报道。</p>
+    <ul class="news-list">
+      {media.map((m) => (
+        <li class="news-item">
+          <span class="news-date">{fmtDate(m.data.date)}</span>
+          <span class="media-outlet">{m.data.outlet}</span>
+          <div class="news-body">
+            <a class="news-title" href={m.data.url} target="_blank" rel="noopener">{m.data.title}</a>
+            {m.data.excerpt && <p class="news-excerpt">{m.data.excerpt}</p>}
+          </div>
+        </li>
+      ))}
+    </ul>
+    <p class="muted"><a href="/media">查看全部报道 →</a></p>
   </section>
 </BaseLayout>

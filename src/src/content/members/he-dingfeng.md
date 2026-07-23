@@ -1,5 +1,6 @@
 ---
 name: "何定峰"
+avatar: /people/he-dingfeng.jpg
 role: "硕士研究生"
 degree: "2023级"
 alumni: true

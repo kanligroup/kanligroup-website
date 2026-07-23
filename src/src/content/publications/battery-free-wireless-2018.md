@@ -6,6 +6,7 @@ year: 2018
 doi: "10.1126/scitranslmed.aan4950"
 highlight: true
 tags: [wireless, wearable]
+direction: "柔性智能微系统"
 ---
 
 Battery-free, wireless sensors for full-body pressure and temperature mapping.

@@ -1,5 +1,6 @@
 ---
 name: "韩炎岐"
+avatar: /people/han-yanqi.jpg
 role: "博士研究生"
 degree: "2026级"
 direction: "柔性智能微系统"

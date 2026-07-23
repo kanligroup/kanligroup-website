@@ -6,6 +6,7 @@ year: 2024
 doi: "10.1007/s40820-024-01571-6"
 highlight: true
 tags: [strain-sensor, crack-engineering]
+direction: "耐高温柔性多模态传感器"
 ---
 
 Flexible Strain Sensors with Ultra-High Sensitivity and Wide Range Enabled by Crack-Modulated Electrical Pathways.

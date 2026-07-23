@@ -1,5 +1,6 @@
 ---
 name: "潘津羽"
+avatar: /people/pan-jinyu.jpg
 role: "硕士研究生"
 degree: "2025级"
 direction: "耐高温柔性多模态传感器"

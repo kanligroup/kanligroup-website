@@ -1,5 +1,6 @@
 ---
 name: "令景辉"
+avatar: /people/ling-jinghui.jpg
 role: "博士研究生"
 degree: "2023级"
 direction: "耐高温柔性多模态传感器"

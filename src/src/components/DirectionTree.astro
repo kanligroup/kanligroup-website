@@ -1,7 +1,8 @@
 ---
 // 研究方向架构图：核心科学问题为根，分三个方向；
-// 每个方向框内列出子方向与团队成员（以彩色 pill 呈现）；底部「应用场景」一行对应三个方向。
-// 成员与人数均从 members collection 动态计算，避免与页面其它处不一致。
+// 每个方向框内列出子方向、团队成员（彩色 pill）与代表论文（期刊名+年份）；
+// 底部「应用场景」一行对应三个方向。
+// 成员与论文均从 collection 动态计算，避免与页面其它处不一致。
 import { getCollection } from 'astro:content';
 
 const PRIMARY = "#1a4d8f";
@@ -17,6 +18,7 @@ const palette = [
 ];
 
 const members = await getCollection('members');
+const publications = await getCollection('publications');
 
 // 按方向取在读学生姓名（不含 PI）
 const namesFor = (title: string) =>
@@ -24,16 +26,78 @@ const namesFor = (title: string) =>
     .filter((m) => m.data.direction === title && !m.data.is_pi)
     .map((m) => m.data.name);
 
+// 按方向取代表论文，按年份倒序
+const pubsFor = (title: string) =>
+  publications
+    .filter((p) => p.data.direction === title)
+    .sort((a, b) => b.data.year - a.data.year);
+
+// 期刊名缩写表（长名用通用缩写，短名保留原文）
+const VENUE_SHORT: Record<string, string> = {
+  "Nature": "Nature",
+  "Nature Communications": "Nat. Commun.",
+  "Science Advances": "Sci. Adv.",
+  "Science Translational Medicine": "Sci. Transl. Med.",
+  "Proceedings of the National Academy of Sciences": "PNAS",
+  "Nature Biomedical Engineering": "Nat. Biomed. Eng.",
+  "Nano Energy": "Nano Energy",
+  "Materials Today": "Mater. Today",
+  "Nano-Micro Letters": "Nano-Micro Lett.",
+  "Rare Metals": "Rare Metals",
+  "Acta Automatica Sinica": "Acta Autom. Sinica",
+  "International Journal of Mechanical Sciences": "Int. J. Mech. Sci.",
+  "Mathematics and Mechanics of Complex Systems": "Math. Mech. Complex Syst.",
+  "High-Temperature Materials": "High-Temp. Mater.",
+  "Discover Sensors": "Discover Sensors",
+  "Advanced Materials Technologies": "Adv. Mater. Technol.",
+  "Programmable Materials": "Programmable Mater.",
+  "NPJ Digital Medicine": "npj Digit. Med.",
+  "Advanced Functional Materials": "Adv. Funct. Mater.",
+  "Advanced Materials": "Adv. Mater.",
+  "View": "View",
+  "Small": "Small",
+  "Research": "Research",
+};
+const venueShort = (v: string) => VENUE_SHORT[v] ?? v;
+const pubLabel = (p: { data: { venue: string; year: number } }) =>
+  `${venueShort(p.data.venue)} ${p.data.year}`;
+
 // 成员 pill 布局：贪心换行
-const CHIP_FONT = 12.5;
-const CHIP_PAD_X = 11;
-const CHIP_H = 24;
-const CHIP_GAP_X = 7;
-const CHIP_GAP_Y = 7;
+const CHIP_FONT = 14.5;
+const CHIP_PAD_X = 12;
+const CHIP_H = 27;
+const CHIP_GAP_X = 8;
+const CHIP_GAP_Y = 8;
 const BW_CONTENT = 308; // 框内可用宽度
 
 function chipWidth(name: string): number {
   return name.length * CHIP_FONT + CHIP_PAD_X * 2;
+}
+
+// 论文条目布局：用「·」分隔，按可用宽度贪心换行
+const PUB_FONT = 14.5;
+const PUB_CHAR_W = 8.0;
+const PUB_SEP = "  ·  ";
+const PUB_SEP_W = PUB_SEP.length * PUB_CHAR_W;
+const PUB_LINE_H = 22;
+
+function wrapPubs(items: string[]): string[][] {
+  const lines: string[][] = [];
+  let cur: string[] = [];
+  let curW = 0;
+  for (const it of items) {
+    const w = it.length * PUB_CHAR_W;
+    const add = (cur.length ? PUB_SEP_W : 0) + w;
+    if (cur.length && curW + add > BW_CONTENT) {
+      lines.push(cur);
+      cur = [];
+      curW = 0;
+    }
+    cur.push(it);
+    curW += (cur.length > 1 ? PUB_SEP_W : 0) + w;
+  }
+  if (cur.length) lines.push(cur);
+  return lines;
 }
 
 const tree = {
@@ -96,7 +160,7 @@ const tree = {
   ],
 };
 
-// 补全每个分支：配色、成员 pill 布局
+// 补全每个分支：配色、成员 pill 布局、代表论文换行
 tree.branches.forEach((b, i) => {
   const names = namesFor(b.title);
   b.count = names.length;
@@ -118,6 +182,9 @@ tree.branches.forEach((b, i) => {
   });
   b.chips = chips;
   b.chipRows = names.length ? maxY / (CHIP_H + CHIP_GAP_Y) + 1 : 0;
+
+  const items = pubsFor(b.title).map(pubLabel);
+  b.pubLines = wrapPubs(items);
 });
 
 // 布局常量
@@ -131,28 +198,42 @@ const ROOT_H = 92;
 const BUS_Y = 168;
 const BRANCH_Y = 236;
 const HEADER_H = 60;
-const SUB_ITEM_H = 27;
+const SUB_ITEM_H = 30;
 const FIRST_SUB_BASE = HEADER_H + 25;   // 第一个子方向文字基线
 const DIVIDER_OFF = 10;
-const LABEL_OFF = 26;                    // 「团队成员」相对分隔线的偏移
+const LABEL_OFF = 26;                    // 分区标签相对分隔线的偏移
 const BOTTOM_PAD = 16;
 
 const xs = tree.branches.map((_, i) => GAP + i * (BW + GAP));
 const centers = tree.branches.map((_, i) => xs[i] + BW / 2);
 
+// 逐段计算每个分支的纵向布局（子方向 → 团队成员 → 发表论文）
 const heights = tree.branches.map((b) => {
   const dividerY = HEADER_H + b.sub.length * SUB_ITEM_H + DIVIDER_OFF;
   const labelY = dividerY + LABEL_OFF;
   const chipsTop = labelY + 12;
   const chipsBottom = chipsTop + (b.chipRows > 0 ? b.chipRows * CHIP_H + (b.chipRows - 1) * CHIP_GAP_Y : 0);
-  return chipsBottom + BOTTOM_PAD;
+  let bottom = chipsBottom;
+  const layout: any = { dividerY, labelY, chipsTop, chipsBottom };
+  if (b.pubLines.length > 0) {
+    const pubsDividerY = chipsBottom + 16;
+    const pubsLabelY = pubsDividerY + LABEL_OFF;
+    const pubsTop = pubsLabelY + 22;
+    const pubsBottom = pubsTop + b.pubLines.length * PUB_LINE_H;
+    layout.pubsDividerY = pubsDividerY;
+    layout.pubsLabelY = pubsLabelY;
+    layout.pubsTop = pubsTop;
+    bottom = pubsBottom;
+  }
+  b.layout = layout;
+  return bottom + BOTTOM_PAD;
 });
 const maxBranchH = Math.max(...heights);
 
 // 应用场景行
 const SCEN_LEAD_Y = 32;
 const SCEN_POINT_TOP = 52;
-const SCEN_POINT_H = 23;
+const SCEN_POINT_H = 26;
 const SCEN_LABEL_Y = BRANCH_Y + maxBranchH + 44;
 const SCEN_BOX_Y = SCEN_LABEL_Y + 30;
 const maxPoints = Math.max(...tree.branches.map((b) => b.scenario.points.length));
@@ -202,10 +283,10 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
   <g filter="url(#softShadow)">
     <rect x={ROOT_X} y={ROOT_Y} width={ROOT_W} height={ROOT_H} rx="14" fill="url(#rootGrad)" />
   </g>
-  <text x={W / 2} y={ROOT_Y + 40} text-anchor="middle" fill="#fff" font-size="26" font-weight="700">
+  <text x={W / 2} y={ROOT_Y + 42} text-anchor="middle" fill="#fff" font-size="30" font-weight="700">
     {tree.root.title}
   </text>
-  <text x={W / 2} y={ROOT_Y + 68} text-anchor="middle" fill="#dbe7f6" font-size="15">
+  <text x={W / 2} y={ROOT_Y + 72} text-anchor="middle" fill="#dbe7f6" font-size="17">
     {tree.root.sub}
   </text>
 
@@ -213,45 +294,53 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
   {
     tree.branches.map((b, i) => {
       const col = b.color;
-      const dividerY = HEADER_H + b.sub.length * SUB_ITEM_H + DIVIDER_OFF;
-      const labelY = dividerY + LABEL_OFF;
-      const chipsTop = labelY + 12;
+      const L = b.layout;
       return (
         <g transform={`translate(${xs[i]}, ${BRANCH_Y})`}>
           <g filter="url(#lightShadow)">
-            <rect x="0" y="0" width={BW} height={heights[i]} rx="14" fill="#fff" stroke={col.main} stroke-width="1.5" />
+            <rect x="0" y="0" width={BW} height={maxBranchH} rx="14" fill="#fff" stroke={col.main} stroke-width="1.5" />
           </g>
-          <!-- 顶部色条 -->
+          {/* 顶部色条 */}
           <path d={`M0 14 Q0 0 14 0 L${BW - 14} 0 Q${BW} 0 ${BW} 14 L${BW} 6 L0 6 Z`} fill={col.main} />
-          <!-- 标题区 -->
-          <text x="20" y="34" fill={col.main} font-size="19" font-weight="700">{b.title}</text>
-          <text x="20" y="52" fill={MUTED} font-size="13.5">{b.count} 名成员</text>
+          {/* 标题区 */}
+          <text x="20" y="36" fill={col.main} font-size="23" font-weight="700">{b.title}</text>
+          <text x="20" y="55" fill={MUTED} font-size="15.5">{b.count} 名成员</text>
 
-          <!-- 子方向 -->
+          {/* 子方向 */}
           {b.sub.map((s, j) => (
             <g transform={`translate(0, ${FIRST_SUB_BASE - 5 + j * SUB_ITEM_H})`}>
-              <circle cx="24" cy="5" r="4" fill={col.main} />
-              <text x="38" y="10" fill={DARK} font-size="15">{s}</text>
+              <circle cx="24" cy="5" r="4.5" fill={col.main} />
+              <text x="38" y="11" fill={DARK} font-size="17.5">{s}</text>
             </g>
           ))}
 
-          <!-- 分隔线 -->
-          <line x1="16" y1={dividerY} x2={BW - 16} y2={dividerY} stroke={LINE} stroke-width="1" />
-          <!-- 团队成员 -->
-          <text x="18" y={labelY} fill={col.main} font-size="13.5" font-weight="700">团队成员</text>
+          {/* 团队成员 */}
+          <line x1="16" y1={L.dividerY} x2={BW - 16} y2={L.dividerY} stroke={LINE} stroke-width="1" />
+          <text x="18" y={L.labelY} fill={col.main} font-size="16" font-weight="700">团队成员</text>
           {b.chips.map((c) => (
             <g>
-              <rect x={c.x} y={chipsTop + c.y} width={c.w} height={CHIP_H} rx={CHIP_H / 2} fill={col.soft} stroke={col.main} stroke-width="1" stroke-opacity="0.45" />
-              <text x={c.x + c.w / 2} y={chipsTop + c.y + CHIP_H / 2 + 4.5} text-anchor="middle" fill={col.main} font-size={CHIP_FONT} font-weight="600">{c.label}</text>
+              <rect x={c.x} y={L.chipsTop + c.y} width={c.w} height={CHIP_H} rx={CHIP_H / 2} fill={col.soft} stroke={col.main} stroke-width="1" stroke-opacity="0.45" />
+              <text x={c.x + c.w / 2} y={L.chipsTop + c.y + CHIP_H / 2 + 4.5} text-anchor="middle" fill={col.main} font-size={CHIP_FONT} font-weight="600">{c.label}</text>
             </g>
           ))}
+
+          {/* 发表论文 */}
+          {b.pubLines.length > 0 && (
+            <g>
+              <line x1="16" y1={L.pubsDividerY} x2={BW - 16} y2={L.pubsDividerY} stroke={LINE} stroke-width="1" />
+              <text x="18" y={L.pubsLabelY} fill={col.main} font-size="16" font-weight="700">发表论文</text>
+              {b.pubLines.map((line, k) => (
+                <text x="18" y={L.pubsTop + k * PUB_LINE_H} fill={DARK} font-size={PUB_FONT}>{line.join(PUB_SEP)}</text>
+              ))}
+            </g>
+          )}
         </g>
       );
     })
   }
 
-  <!-- 应用场景行 -->
-  <text x={W / 2} y={SCEN_LABEL_Y} text-anchor="middle" fill="#334155" font-size="18" font-weight="700">应用场景</text>
+  {/* 应用场景行 */}
+  <text x={W / 2} y={SCEN_LABEL_Y} text-anchor="middle" fill="#334155" font-size="21" font-weight="700">应用场景</text>
   {
     tree.branches.map((b, i) => {
       const col = b.color;
@@ -261,11 +350,11 @@ const H = SCEN_BOX_Y + SCEN_BOX_H + 28;
             <rect x="0" y="0" width={BW} height={SCEN_BOX_H} rx="14" fill={col.soft2} stroke={col.main} stroke-width="1.5" />
           </g>
           <line x1="15" y1="16" x2="15" y2={SCEN_BOX_H - 16} stroke={col.main} stroke-width="3.5" stroke-linecap="round" />
-          <text x="28" y={SCEN_LEAD_Y} fill={col.main} font-size="14.5" font-weight="700">{b.scenario.lead}</text>
+          <text x="28" y={SCEN_LEAD_Y} fill={col.main} font-size="16.5" font-weight="700">{b.scenario.lead}</text>
           {b.scenario.points.map((p, k) => (
             <g transform={`translate(0, ${SCEN_POINT_TOP + k * SCEN_POINT_H})`}>
-              <circle cx="32" cy="5" r="3" fill={col.main} />
-              <text x="42" y="10" fill={DARK} font-size="13">{p}</text>
+              <circle cx="32" cy="5" r="3.5" fill={col.main} />
+              <text x="42" y="11" fill={DARK} font-size="15">{p}</text>
             </g>
           ))}
         </g>

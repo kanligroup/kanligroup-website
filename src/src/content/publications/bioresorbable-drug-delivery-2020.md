@@ -5,6 +5,7 @@ venue: "Science Advances"
 year: 2020
 doi: "10.1126/sciadv.abb1093"
 tags: [bioresorbable, drug-delivery]
+direction: "柔性智能微系统"
 ---
 
 Wirelessly controlled, bioresorbable drug delivery device with active valves that exploit electrochemically triggered crevice corrosion.

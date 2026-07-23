@@ -5,11 +5,23 @@ interface Props {
 }
 const { member } = Astro.props;
 const { name, role, degree, direction, project, email, affiliation } = member.data;
+const photo = member.data.avatar ?? `/people/${member.slug}.svg`;
+
+// 方向色映射（与全局三神圣色一致：蓝 / 青绿 / 紫）
+const dirColors: Record<string, string> = {
+  "柔性电子微飞行器": "#1a4d8f",
+  "耐高温柔性多模态传感器": "#0f6e58",
+  "柔性智能微系统": "#7c3aed",
+};
+const mc = member.data.is_pi
+  ? "var(--primary)"
+  : (direction ? (dirColors[direction] ?? "var(--primary)") : null);
 ---
 
-<div class="card">
+<div class="card member-card" style={mc ? `--mc:${mc}` : undefined}>
+  {mc && <span class="m-accent" aria-hidden="true"></span>}
   <div class="member-head">
-    <div class="m-avatar">{name.slice(0, 1)}</div>
+    <img class="m-photo" src={photo} alt={name} width="96" height="96" loading="lazy" />
     <div>
       <p class="m-name">{name}</p>
       <p class="m-role">
@@ -22,7 +34,7 @@ const { name, role, degree, direction, project, email, affiliation } = member.da
   {member.data.alumni ? (
     affiliation && <p class="project">毕业去向：{affiliation}</p>
   ) : (
-    direction && <p>方向：{direction}</p>
+    direction && <p class="m-dir" style={`color:${mc}`}>{direction}</p>
   )}
   {!member.data.alumni && project && <p class="project">负责：{project}</p>}
   {email && <p class="muted">{email}</p>}

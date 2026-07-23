@@ -6,6 +6,7 @@ year: 2026
 volume: "2 (1), 28"
 doi: "10.1007/s44397-026-00061-1"
 tags: [high-temp, pressure-sensor, flexible]
+direction: "耐高温柔性多模态传感器"
 ---
 
 Design approaches for high-temperature-resistant flexible pressure sensors in extreme environments.

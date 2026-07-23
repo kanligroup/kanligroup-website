@@ -1,5 +1,6 @@
 ---
 name: "许子健"
+avatar: /people/xu-zijian.jpg
 role: "博士研究生"
 degree: "2022级"
 direction: "耐高温柔性多模态传感器"
