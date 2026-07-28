@@ -189,7 +189,7 @@ const en: Dict = {
     eyebrow:
       'Huazhong University of Science and Technology · State Key Laboratory of Intelligent Manufacturing Equipment and Technology',
     lede: 'Grounded in theoretical and applied mechanics, we develop distributed sensing on flexible substrates. We focus on flexible electronic microfliers, high-temperature flexible multimodal sensors, and flexible intelligent microsystems, and provide the sensing infrastructure and data foundation for Physical AI.',
-    heroTitleCn: '· Kan Li Lab',
+    heroTitleCn: '· 厉侃课题组',
     heroCta1: 'Research Directions →',
     heroCta2: 'About the Lab',
     dirKicker: 'Research Directions',
