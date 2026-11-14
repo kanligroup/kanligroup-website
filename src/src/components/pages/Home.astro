@@ -17,6 +17,8 @@ const tagEn: Record<string, string> = {
   '综述': 'Review',
   '传感': 'Sensing',
   '学术任职': 'Academic Appointment',
+  '学术交流': 'Academic Exchange',
+  '合作动态': 'Industry Collaboration',
   '柔性结构': 'Flexible Structure',
   '项目获批': 'Project Awarded',
   '微飞行器': 'Microflier',
@@ -37,12 +39,10 @@ const news = (await getCollection('news'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 5);
 
-const allMedia = (await getCollection('media')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
-const media = allMedia.filter(
-  (m) => m.data.outlet === '人民日报' || m.data.outlet === '清华大学'
-);
+// 按日期取最新 4 条，避免硬编码来源导致新增报道永远无法出现在首页
+const media = (await getCollection('media'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 4);
 
 const fmtDate = (d: Date) =>
   `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}`;

@@ -74,7 +74,9 @@ async function main() {
       hIndexSince: prev?.hIndexSince ?? null,
       i10: prev?.i10 ?? null,
       i10Since: prev?.i10Since ?? null,
-      fetchedAt: now,
+      // 抓取失败时保留「上次成功抓取」的数据日期，避免把失败时间误显示为数据时间
+      fetchedAt: prev?.fetchedAt ?? now,
+      lastAttemptAt: now,
       source: SCHOLAR_URL,
       live: false,
       error: String(e.message || e),

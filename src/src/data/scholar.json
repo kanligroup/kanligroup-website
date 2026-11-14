@@ -6,7 +6,8 @@
   "i10": 38,
   "i10Since": 37,
   "fetchedAt": "2026-07-23T23:22:20.556Z",
+  "lastAttemptAt": "2026-11-14T14:31:15.821Z",
   "source": "https://scholar.google.com/citations?user=vWZDbKIAAAAJ&hl=en",
-  "live": true,
-  "error": null
+  "live": false,
+  "error": "fetch failed"
 }

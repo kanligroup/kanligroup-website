@@ -77,18 +77,22 @@ npm run dev        # → http://localhost:4321  （Astro 默认端口）
 - 加新组件优先复用 `.card / .btn / .tag / .section / .container` 等现有类，遵循 `DESIGN.md` 第 4、7 章。
 - 禁止在 `global.css` 之外散布同名 CSS 变量。
 
-## 7. Scholar 实时数据
+## 7. Scholar 指标数据
 - `src/scripts/fetch-scholar.mjs` 在每次 `build` 时抓取 `user=vWZDbKIAAAAJ` 的引用/h-index/i10 指标，写入 `src/src/data/scholar.json`。
-- **容错**：抓取失败会保留上一次成功缓存（字段 `live:false`），不会让构建崩。
+- **容错**：抓取失败保留上一次成功缓存（`live:false`），不会让构建崩。2026-11-14 起，失败时保留 `fetchedAt`（真实数据日期），另记 `lastAttemptAt`，避免把失败时间误显示为数据日期。
 - 手动刷新（不构建整站）：`cd src && npm run fetch:scholar`。
+- **当前缓存**：引用 5168 / h-index 29 / i10 38，数据日期 **2026-07-23**。2026-11-14 实测本机无法访问 `scholar.google.com`（连接超时），需在可访问的网络环境刷新，或由 PI 提供新数值后手工更新 `scholar.json`。「关于」页会显示数据日期与缓存状态，不会把旧数据冒充实时数据。
 
 ## 8. 已知问题与待办（维护时留意）
-- **HTTPS 未生效 / 浏览器报不安全**：GitHub Pages → Settings → Pages → 确认 Custom domain=kanligroup.com 并勾选 **Enforce HTTPS**（若灰显先取消保存再重勾触发签发）。本环境无法代操作。
-- **www.kanligroup.com 502**：阿里云 DNS 缺 `www` 记录，建议加 CNAME `www → kanligroup.github.io`。
-- **微信内置浏览器打不开**：GitHub Pages 在境外 + 域名无 ICP 备案会被拦截；可靠解法是迁阿里云 OSS+CDN 并完成 ICP 备案（见第 4 节 B）。
-- **成员档案缺口**：xlsx 记 17 人，`content/members` 已 21 个文件，但仍疑似有 2 名在读生档案缺失，需厉侃确认补全。
-- **合作网络页**：已删旧 collab 页，是否补"合作网络"页待定。
+- ✅ **HTTPS / www 域名（2026-11-14 复核已解决）**：`https://kanligroup.com` 返回 200，`https://www.kanligroup.com` 返回 301；DNS 已有 4 条 A 记录（185.199.108/109/110/111.153）与 `www → kanligroup.github.io` 的 CNAME。旧版手册中「HTTPS 未生效」「www 502」两条已作废。
+- **微信内置浏览器打不开**：GitHub Pages 在境外 + 域名无 ICP 备案可能被拦截；可靠解法是迁阿里云 OSS+CDN 并完成 ICP 备案（见第 4 节 B）。
+- **Scholar 指标待刷新**：见第 7 节，需可访问 Google Scholar 的网络环境。
+- **成员名单待核对**：`content/members` 共 21 个文件（含 PI、5 名校友、15 名在读：9 博 + 6 硕）。旧记录为 17 人，差额需厉侃确认；未确认前不要凭空新增成员档案。
+- **合作网络页**：已删旧 collab 页，是否补「合作网络」页待定。
 - **frontmatter 含冒号需加引号**（如含 `:` 的值用 `"..."` 包裹）。
+
+## 8a. 内容更新记录
+- **2026-11-14**：新增 2 篇 2026 论文（Adv. Fiber Mater. 温压双感、Smart Mater. Devices 柔性 PZT 综述）、5 条新闻（乐动机器人合作、ICFE 2026 / 软物质力学大会邀请报告、钱伟长论坛补录、PZT 综述）、2 条媒体报道；AFM 新闻由「接收」更正为「正式发表」并补 DOI；3 位综述作者档案补成果关联；首页「相关报道」改为按日期取最新 4 条；中英映射同步。详见当次《网站更新对照说明》。
 
 ## 9. 紧急修复清单
 1. 内容错误 → 改对应 Markdown → `git push` → 等 Actions。
